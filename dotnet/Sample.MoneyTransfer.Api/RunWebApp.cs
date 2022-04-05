@@ -5,6 +5,7 @@ using OpenTelemetry.Instrumentation.Digma;
 using Sample.MoneyTransfer.API.Utils;
 using Sample.MoneyTransfer.API.Data;
 using Microsoft.EntityFrameworkCore;
+using Sample.MoneyTransfer.API.Domain.Services;
 
 namespace Sample.MoneyTransfer.API;
 
@@ -50,7 +51,9 @@ public class RunWebApp
                 .AddDbContext<MoneyKeepingContext>(options =>
                     options.UseInMemoryDatabase(databaseName: "Vault"));
 
-            var app = builder.Build();
+        builder.Services.AddScoped<IMoneyTransferDomainService, MoneyTransferDomainService>();
+
+        var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

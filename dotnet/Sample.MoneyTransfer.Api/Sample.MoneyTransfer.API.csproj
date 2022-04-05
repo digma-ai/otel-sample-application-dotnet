@@ -26,9 +26,11 @@
     <None Remove="OpenTel.Instrumentation.Digma" />
     <None Remove="Domain\Models\" />
     <None Remove="Data\" />
+    <None Remove="Testing\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Domain\Models\" />
     <Folder Include="Data\" />
+    <Folder Include="Testing\" />
   </ItemGroup>
 </Project>
