@@ -39,7 +39,9 @@ public class RunWebApp
                 .SetResourceBuilder(
                 ResourceBuilder.CreateDefault()
                     .AddService(serviceName: serviceName, serviceVersion: serviceVersion ?? "0.0.0")
-                    .AddDigmaAttributes(configure => { configure.CommitId = commitHash; }))
+                    .AddDigmaAttributes(configure => {
+                        configure.CommitId = commitHash;
+                    }))
                 .AddOtlpExporter(c =>
                 {
                     c.Endpoint = new Uri(digma_url);
@@ -48,10 +50,13 @@ public class RunWebApp
             );  
 
             builder.Services
-                .AddDbContext<MoneyKeepingContext>(options =>
+                .AddDbContext<Gringotts >(options =>
                     options.UseInMemoryDatabase(databaseName: "Vault"));
 
         builder.Services.AddScoped<IMoneyTransferDomainService, MoneyTransferDomainService>();
+
+        builder.Services.AddScoped<ICreditProviderService, CreditProviderService>();
+
 
         var app = builder.Build();
 

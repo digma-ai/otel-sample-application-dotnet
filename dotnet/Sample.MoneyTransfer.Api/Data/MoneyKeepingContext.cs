@@ -4,9 +4,9 @@ using Sample.MoneyTransfer.API.Domain.Models;
 
 namespace Sample.MoneyTransfer.API.Data
 {
-	public class MoneyKeepingContext : DbContext
+	public class Gringotts  : DbContext
     {
-        public MoneyKeepingContext(DbContextOptions options) : base(options)
+        public Gringotts (DbContextOptions options) : base(options)
         {
         }
 

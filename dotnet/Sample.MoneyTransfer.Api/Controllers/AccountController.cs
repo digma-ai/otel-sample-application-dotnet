@@ -12,10 +12,10 @@ namespace Sample.MoneyTransfer.API.Controllers
     [Route("[controller]")]
     public class AccountController : ControllerBase
     {
-        private readonly MoneyKeepingContext context;
+        private readonly Gringotts  context;
         private readonly ILogger<AccountController> _logger;
 
-        public AccountController(MoneyKeepingContext context, ILogger<AccountController> logger)
+        public AccountController(Gringotts  context, ILogger<AccountController> logger)
         {
             this.context = context;
             this._logger = logger;
@@ -25,7 +25,9 @@ namespace Sample.MoneyTransfer.API.Controllers
         public async Task<ActionResult<CreateAccountResponse>> CreateAccount(
             NewAccountRequest accountRequest)
         {
-            var account = new Account() { AccountName = accountRequest.AccountName };
+            var account = new Account() { AccountName = accountRequest.AccountName,
+                                          Balance=accountRequest.InitialFunds,
+                                          Internal=accountRequest.Internal};
 
             try
             {
@@ -45,7 +47,7 @@ namespace Sample.MoneyTransfer.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Account>> GetAccount(long id)
+        public async Task<ActionResult<AccountDto>> GetAccount(long id)
         {
             var account = await context.Accounts.FindAsync(id);
 
@@ -54,7 +56,7 @@ namespace Sample.MoneyTransfer.API.Controllers
                 return NotFound();
             }
 
-            return account;
+            return new AccountDto { AccountId=account.Id, AccountName=account.AccountName};
         }
     }
 }

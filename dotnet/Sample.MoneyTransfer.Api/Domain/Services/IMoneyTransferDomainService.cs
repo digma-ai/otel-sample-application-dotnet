@@ -4,7 +4,7 @@ namespace Sample.MoneyTransfer.API.Domain.Services
 {
     public interface IMoneyTransferDomainService
     {
-        void DepositeFunds(Account account, int amount);
-        void TransferFunds(Account source, Account target, int amount);
+        Task DepositeFunds(long account, int amount);
+        Task<TransferRecord> TransferFunds(long source, long target, int amount);
     }
 }

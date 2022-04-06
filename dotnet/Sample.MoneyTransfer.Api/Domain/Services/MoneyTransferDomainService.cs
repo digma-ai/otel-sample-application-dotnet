@@ -9,38 +9,104 @@ namespace Sample.MoneyTransfer.API.Domain.Services
     {
         private static readonly ActivitySource Activity = new(nameof(MoneyTransferDomainService));
 
-        private readonly MoneyKeepingContext context;
+        private readonly Gringotts  moneyVault;
+        private readonly ICreditProviderService creditProviderService;
 
-        public MoneyTransferDomainService(MoneyKeepingContext context)
+        public MoneyTransferDomainService(Gringotts  context, ICreditProviderService creditProviderService)
         {
-            this.context = context;
+            this.moneyVault = context;
+            this.creditProviderService = creditProviderService;
         }
 
-        public async void TransferFunds(Account source, Account target, int amount)
+
+        private async Task<bool> ValidateAccountFunds(Account account, int amount)
         {
-            using (var activity = Activity.StartActivity("Peristing new balance", ActivityKind.Internal))
+
+            using (var activity = Activity.StartActivity("Validating account funds", ActivityKind.Internal))
+            {
+                if (account.Balance >= amount)
+                {
+                    return true;
+                }
+                else
+                {
+                    if (account.Internal)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return await creditProviderService.CheckCreditProvider(account.Id);
+                    }
+                }
+         
+                
+
+            }
+
+        }
+
+        private async Task<Account> RetrieveAccount(long id)
+        {
+            using (var activity = Activity.StartActivity("Retrieving account", ActivityKind.Internal))
+            {
+                return await moneyVault.Accounts.FindAsync(id);
+
+            }
+
+        }
+
+        public async Task<TransferRecord> TransferFunds(long source, long target, int amount)
+        {
+
+            var sourceAccount = await RetrieveAccount(target);
+
+            var targetAccount = await RetrieveAccount(target);
+
+            bool fundsAvailalbe = await ValidateAccountFunds(sourceAccount, amount);
+
+            if (!fundsAvailalbe)
+            {
+                throw new Exception("Insufficient funds");
+            }
+
+            using (var activity = Activity.StartActivity("Peristing balance transfer", ActivityKind.Internal))
             {
 
-                source.Balance -= amount;
-                target.Balance += amount;
-                _ = await context.SaveChangesAsync();
+                sourceAccount.Balance -= amount;
+                targetAccount.Balance += amount;
+                _ = await moneyVault.SaveChangesAsync();
 
             }
 
             using (var activity = Activity.StartActivity("Creating record of transaction", ActivityKind.Internal))
             {
-                context.Add<TransferRecord>(new TransferRecord() { SourceAccount = source, TargetAccount = target });
-                _ = await context.SaveChangesAsync();
+                var transferRecord = new TransferRecord()
+                {
+                    SourceAccount = sourceAccount,
+                    TargetAccount = targetAccount,
+                    TransferTime = DateTime.Now,
+                    Amount = amount
+                };
+                moneyVault.Add<TransferRecord>(transferRecord);
+                _ = await moneyVault.SaveChangesAsync();
+                return transferRecord;
 
             }
-
-
         }
 
-        public async void DepositeFunds(Account account, int amount)
+
+
+
+        public async Task DepositeFunds(long accountId, int amount)
         {
-            account.Balance += amount;
-            _ = await context.SaveChangesAsync();
+            var account = await RetrieveAccount(accountId);
+
+            using (var activity = Activity.StartActivity("Peristing balance increase", ActivityKind.Internal))
+            {
+                account.Balance += amount;
+                _ = await moneyVault.SaveChangesAsync();
+            }
         }
 
     }

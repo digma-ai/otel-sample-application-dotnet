@@ -11,11 +11,11 @@ namespace Sample.MoneyTransfer.API.Controllers;
 public class TransferController : ControllerBase
 {
     private static readonly ActivitySource Activity = new(nameof(TransferController));
-    private readonly MoneyKeepingContext moneyVault;
+    private readonly Gringotts  moneyVault;
     private readonly ILogger<TransferController> _logger;
     private readonly IMoneyTransferDomainService moneyTransferDomainService;
 
-    public TransferController(MoneyKeepingContext moneyVault,
+    public TransferController(Gringotts  moneyVault,
                               ILogger<TransferController> logger,
                               IMoneyTransferDomainService moneyTransferDomainService)
     {
@@ -25,36 +25,34 @@ public class TransferController : ControllerBase
     }
 
     [HttpPost(Name = "deposit")]
-    public TransferResult DepositFunds(DepositRequest request)
+    public async Task DepositFunds(DepositRequest request)
     {
 
         using (var activity = Activity.StartActivity("Process deposit", ActivityKind.Internal))
         {
 
-            var account = moneyVault.Accounts.Find(request.AccountId);
-            moneyTransferDomainService.DepositeFunds(account,
-                                                     request.Amount);
+            var account = await moneyVault.Accounts.FindAsync(request.AccountId);
+            moneyTransferDomainService.DepositeFunds(account.Id, request.Amount);
 
 
         }
-        return new TransferResult();
 
     }
     [HttpPost(Name = "transfer")]
-    public TransferResult TransferFunds(TransferRequest request)
+    public async Task<TransferResult> TransferFunds(TransferRequest request)
     {
 
         using (var activity = Activity.StartActivity("Process transfer", ActivityKind.Internal)){
 
-            var sourceAccount = moneyVault.Accounts.Find(request.SouceAccountId);
-            var targetAccount = moneyVault.Accounts.Find(request.TargetAccountId);
-            moneyTransferDomainService.TransferFunds(sourceAccount,
-                                                     targetAccount,
+
+            var transferRecord = await moneyTransferDomainService.TransferFunds(request.SouceAccountId,
+                                                     request.TargetAccountId,
                                                      request.Amount);
+
+            return new TransferResult { Success = true, TransferDate = transferRecord.TransferTime };
 
 
         }
-        return new TransferResult();
 
     }
 }

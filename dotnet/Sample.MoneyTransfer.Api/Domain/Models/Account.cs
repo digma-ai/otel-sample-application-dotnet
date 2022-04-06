@@ -7,7 +7,9 @@ namespace Sample.MoneyTransfer.API.Domain.Models
 
 		public int Balance { get; set; }
 
-		public string AccountName { get; set; } 
+		public string AccountName { get; set; }
+
+		public bool Internal { get; set; }
 
 	}
 }
