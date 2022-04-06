@@ -5,15 +5,17 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Sample.MoneyTransfer.Api\Sample.MoneyTransfer.API.csproj" />
-  </ItemGroup>
+
   <ItemGroup>
     <None Remove="System.Net.Http.Json" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Net.Http.Json" Version="6.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Sample.MoneyTransfer.Api\Sample.MoneyTransfer.API.csproj" />
   </ItemGroup>
 </Project>

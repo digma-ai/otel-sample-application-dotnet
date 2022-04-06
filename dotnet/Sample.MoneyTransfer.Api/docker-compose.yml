@@ -1,0 +1,17 @@
+version: '3.6'
+name: 'digma-sample'
+services:
+  money-transfer.api:
+    image: digma/sample.money-transfer:latest
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - Digma__URL=http://digma-collector-api:81
+    ports:
+      - "7151:7151"
+    networks:
+      - digma-network
+networks:
+  digma-network:
+    external: true

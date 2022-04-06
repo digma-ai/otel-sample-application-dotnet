@@ -16,11 +16,14 @@ public class RunWebApp
         {
             //Standard MVC boilerplate
             var builder = WebApplication.CreateBuilder(args);
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
+
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            var digma_url = builder.Configuration.GetSection("Digma").GetValue<string>("URL");
-
+            var digmaUrl = builder.Configuration.GetSection("Digma").GetValue<string>("URL");
+            Console.WriteLine($"Digma Url: {digmaUrl}");
             var serviceName = typeof(RunWebApp).Assembly.GetName().Name;
             var serviceVersion = typeof(RunWebApp).Assembly.GetName().Version!.ToString();
 
@@ -44,7 +47,7 @@ public class RunWebApp
                     }))
                 .AddOtlpExporter(c =>
                 {
-                    c.Endpoint = new Uri(digma_url);
+                    c.Endpoint = new Uri(digmaUrl);
                 })
                 .AddSource(serviceName)
             );  
@@ -61,13 +64,13 @@ public class RunWebApp
         var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
+            //if (app.Environment.IsDevelopment())
+           // {
                 app.UseSwagger();
                 app.UseSwaggerUI();
-            }
+            //}
 
-            app.UseHttpsRedirection();
+           //app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
