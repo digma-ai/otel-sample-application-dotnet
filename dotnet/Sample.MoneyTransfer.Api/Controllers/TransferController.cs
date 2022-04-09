@@ -32,9 +32,9 @@ public class TransferController : ControllerBase
         {
 
             var account = await moneyVault.Accounts.FindAsync(request.AccountId);
-            moneyTransferDomainService.DepositeFunds(account.Id, request.Amount);
+            await moneyTransferDomainService.DepositeFunds(account.Id, request.Amount);
 
-
+           
         }
 
     }

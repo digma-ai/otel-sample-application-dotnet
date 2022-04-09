@@ -41,6 +41,7 @@ public class RunWebApp
                 .AddHttpClientInstrumentation()
                 .SetResourceBuilder(
                 ResourceBuilder.CreateDefault()
+                    .AddTelemetrySdk()
                     .AddService(serviceName: serviceName, serviceVersion: serviceVersion ?? "0.0.0")
                     .AddDigmaAttributes(configure => {
                         configure.CommitId = commitHash;
@@ -49,7 +50,7 @@ public class RunWebApp
                 {
                     c.Endpoint = new Uri(digmaUrl);
                 })
-                .AddSource(serviceName)
+                .AddSource("*")
             );  
 
             builder.Services
