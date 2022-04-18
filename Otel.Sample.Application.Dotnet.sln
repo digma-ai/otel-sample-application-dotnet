@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 25.0.1700.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.MoneyTransfer.API", "Sample.MoneyTransfer.Api\Sample.MoneyTransfer.API.csproj", "{BF37078D-94C8-47D0-9852-1D392A2B235D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientTester", "Sample.Client.Test\ClientTester.csproj", "{79D6D767-EE98-47B0-B939-6DF0D4E61FA8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BF37078D-94C8-47D0-9852-1D392A2B235D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF37078D-94C8-47D0-9852-1D392A2B235D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF37078D-94C8-47D0-9852-1D392A2B235D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF37078D-94C8-47D0-9852-1D392A2B235D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79D6D767-EE98-47B0-B939-6DF0D4E61FA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79D6D767-EE98-47B0-B939-6DF0D4E61FA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79D6D767-EE98-47B0-B939-6DF0D4E61FA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79D6D767-EE98-47B0-B939-6DF0D4E61FA8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0B253AAD-D543-4DD7-BC2D-B48CEC037D0F}
+	EndGlobalSection
+EndGlobal
