@@ -4,12 +4,12 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 
-COPY ["ClientTester/ClientTester/ClientTester.csproj", "ClientTester/ClientTester/"]
+COPY ["Sample.Client.Test/ClientTester.csproj", "Sample.Client.Test/"]
 COPY ["Sample.MoneyTransfer.Api/Sample.MoneyTransfer.API.csproj", "Sample.MoneyTransfer.Api/"]
-RUN dotnet restore "ClientTester/ClientTester/ClientTester.csproj"
+RUN dotnet restore "Sample.Client.Test/ClientTester.csproj"
 COPY "Sample.MoneyTransfer.Api" "Sample.MoneyTransfer.Api"
-COPY "ClientTester" "ClientTester"
-WORKDIR "/src/ClientTester/ClientTester"
+COPY "Sample.Client.Test" "Sample.Client.Test"
+WORKDIR "/src/Sample.Client.Test"
 RUN dotnet build "ClientTester.csproj" -c Release -o /app/build
 
 FROM build AS publish

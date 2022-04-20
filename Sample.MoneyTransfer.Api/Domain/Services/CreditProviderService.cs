@@ -13,7 +13,7 @@ namespace Sample.MoneyTransfer.API.Domain.Services
             using (var activity = Activity.StartActivity("Validating account funds", ActivityKind.Internal))
             {
                 //Simulate check with external service
-                await Task.Delay(300);
+                await Task.Delay(2000);
                 return (rand.Next() % 5) != 0;
 
             }
