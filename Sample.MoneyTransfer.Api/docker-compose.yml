@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: ./Dockerfile
     environment:
-      - Digma__URL=http://digma-collector-api:81
+      - Digma__URL=http://digma-collector-api:5050
     ports:
       - "7151:7151"
     networks:
