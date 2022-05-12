@@ -22,6 +22,7 @@ public class RunWebApp
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddEndpointMonitoring();
             var digmaUrl = builder.Configuration.GetSection("Digma").GetValue<string>("URL");
             Console.WriteLine($"Digma Url: {digmaUrl}");
             var serviceName = typeof(RunWebApp).Assembly.GetName().Name;

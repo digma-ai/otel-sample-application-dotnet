@@ -11,11 +11,10 @@ else if(args.Any())
     url = args[0];
 }
 
-
-
 var accountapi = new AccountsApiClient(url);
 var transfersapi = new TransfersApiClient(url);
 
+await new InsightDataGenerator(url).GenerateInsightData();
 
 var externalAccounts = await accountapi.Create(10,10, false);
 
@@ -42,5 +41,5 @@ for (var i = 0; i < 300; i++)
     await accountapi.Get(accounts.ElementAt(1).AccountId);
     await accountapi.Get(accounts.ElementAt(2).AccountId);
 
-
 }
+
