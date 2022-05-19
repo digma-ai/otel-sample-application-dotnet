@@ -28,7 +28,8 @@ public class TransferController : ControllerBase
     public async Task DepositFunds(DepositRequest request)
     {
 
-        using (var activity = Activity.StartActivity("Process deposit", ActivityKind.Internal))
+        // using (var activity = Activity.StartActivity("Process deposit", ActivityKind.Internal))
+        using (var activity = Activity.StartActivity("Sample.MoneyTransfer.API/TransferController.DepositFunds", ActivityKind.Internal))
         {
 
             var account = await moneyVault.Accounts.FindAsync(request.AccountId);
