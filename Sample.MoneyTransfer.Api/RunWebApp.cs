@@ -40,13 +40,16 @@ public class RunWebApp
                 .AddAspNetCoreInstrumentation(options =>{options.RecordException = true;})
                 .AddHttpClientInstrumentation()
                 .SetResourceBuilder(
-                ResourceBuilder.CreateDefault()
-                    .AddTelemetrySdk()
-                    .AddService(serviceName: serviceName, serviceVersion: serviceVersion ?? "0.0.0")
-                    .AddDigmaAttributes(configure =>
-                    {
-                        if(commitHash is not null) configure.CommitId = commitHash;
-                    }))
+                    ResourceBuilder.CreateDefault()
+                        .AddTelemetrySdk()
+                        .AddService(serviceName: serviceName, serviceVersion: serviceVersion ?? "0.0.0")
+                        .AddDigmaAttributes(configure =>
+                        {
+                            if(commitHash is not null) configure.CommitId = commitHash;
+                            configure.SpanMappingPattern = @"(?<ns>[\S\.]+)\/(?<class>\S+)\.(?<method>\S+)";
+                            configure.SpanMappingReplacement = @"${ns}.Controllers.${class}.${method}";
+                        })
+                )
                 .AddOtlpExporter(c =>
                 {
                     c.Endpoint = new Uri(digmaUrl);
