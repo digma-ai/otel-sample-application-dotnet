@@ -8,6 +8,7 @@ services:
       dockerfile: ./Dockerfile
     environment:
       - Digma__URL=http://digma-collector-api:5050
+      - DEPLOYMENT_COMMIT_ID
     ports:
       - "7151:7151"
     networks:

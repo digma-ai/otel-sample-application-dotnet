@@ -22,13 +22,18 @@ public class RunWebApp
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddEndpointMonitoring();
             var digmaUrl = builder.Configuration.GetSection("Digma").GetValue<string>("URL");
             Console.WriteLine($"Digma Url: {digmaUrl}");
             var serviceName = typeof(RunWebApp).Assembly.GetName().Name;
             var serviceVersion = typeof(RunWebApp).Assembly.GetName().Version!.ToString();
 
+            Console.WriteLine($"DEPLOYMENT_COMMIT_ID={Environment.GetEnvironmentVariable("DEPLOYMENT_COMMIT_ID")}");
+            
             //Optional for dev context only
-            string commitHash = SCMUtils.GetLocalCommitHash(builder);
+            string ? commitHash = SCMUtils.GetLocalCommitHash(builder);
+
+            Console.WriteLine($"GetLocalCommitHash: {commitHash}");
 
             //Configure opentelemetry
             builder.Services.AddOpenTelemetryTracing(builder => builder
@@ -40,7 +45,7 @@ public class RunWebApp
                         .AddService(serviceName: serviceName, serviceVersion: serviceVersion ?? "0.0.0")
                         .AddDigmaAttributes(configure =>
                         {
-                            configure.CommitId = commitHash;
+                            if(commitHash is not null) configure.CommitId = commitHash;
                             configure.SpanMappingPattern = @"(?<ns>[\S\.]+)\/(?<class>\S+)\.(?<method>\S+)";
                             configure.SpanMappingReplacement = @"${ns}.Controllers.${class}.${method}";
                         })

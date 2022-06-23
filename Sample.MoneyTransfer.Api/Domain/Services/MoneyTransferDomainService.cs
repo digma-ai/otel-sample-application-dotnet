@@ -1,10 +1,12 @@
 using System;
 using System.Diagnostics;
+using OpenTelemetry.Instrumentation.Digma.Helpers.Attributes;
 using Sample.MoneyTransfer.API.Data;
 using Sample.MoneyTransfer.API.Domain.Models;
 
 namespace Sample.MoneyTransfer.API.Domain.Services
 {
+    [ActivitiesAttributes("activity_type:Money Operations", "layer:Domain")]
     public class MoneyTransferDomainService : IMoneyTransferDomainService
     {
         private static readonly ActivitySource Activity = new(nameof(MoneyTransferDomainService));
@@ -12,18 +14,10 @@ namespace Sample.MoneyTransfer.API.Domain.Services
         private readonly Gringotts  moneyVault;
         private readonly ICreditProviderService creditProviderService;
 
-        public MoneyTransferDomainService(Gringotts  context, ICreditProviderService creditProviderService)
-        {
-            this.moneyVault = context;
-            this.creditProviderService = creditProviderService;
-        }
-
-
+        [TraceActivity(name:"Validating account funds")]
         private async Task<bool> ValidateAccountFunds(Account account, int amount)
         {
 
-            using (var activity = Activity.StartActivity("Validating account funds", ActivityKind.Internal))
-            {
                 if (account.Balance >= amount)
                 {
                     return true;
@@ -39,21 +33,13 @@ namespace Sample.MoneyTransfer.API.Domain.Services
                         return await creditProviderService.CheckCreditProvider(account.Id);
                     }
                 }
-         
                 
-
-            }
-
         }
-
+        
+        [TraceActivity(recordExceptions:false)]
         private async Task<Account> RetrieveAccount(long id)
         {
-            using (var activity = Activity.StartActivity("Retrieving account", ActivityKind.Internal))
-            {
-                return await moneyVault.Accounts.FindAsync(id);
-
-            }
-
+            return await moneyVault.Accounts.FindAsync(id);
         }
 
         public async Task<TransferRecord> TransferFunds(long source, long target, int amount)
@@ -95,9 +81,6 @@ namespace Sample.MoneyTransfer.API.Domain.Services
             }
         }
 
-
-
-
         public async Task DepositeFunds(long accountId, int amount)
         {
             var account = await RetrieveAccount(accountId);
@@ -108,6 +91,13 @@ namespace Sample.MoneyTransfer.API.Domain.Services
                 _ = await moneyVault.SaveChangesAsync();
             }
         }
+        
+        public MoneyTransferDomainService(Gringotts  context, ICreditProviderService creditProviderService)
+        {
+            this.moneyVault = context;
+            this.creditProviderService = creditProviderService;
+        }
+
 
     }
 }
