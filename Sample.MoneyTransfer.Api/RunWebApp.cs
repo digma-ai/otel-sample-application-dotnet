@@ -28,8 +28,10 @@ public class RunWebApp
             var serviceName = typeof(RunWebApp).Assembly.GetName().Name;
             var serviceVersion = typeof(RunWebApp).Assembly.GetName().Version!.ToString();
 
+            Console.WriteLine($"DEPLOYMENT_COMMIT_ID={Environment.GetEnvironmentVariable("DEPLOYMENT_COMMIT_ID")}");
+            
             //Optional for dev context only
-            string commitHash = SCMUtils.GetLocalCommitHash(builder);
+            string ? commitHash = SCMUtils.GetLocalCommitHash(builder);
 
             //Configure opentelemetry
             builder.Services.AddOpenTelemetryTracing(builder => builder
@@ -39,7 +41,10 @@ public class RunWebApp
                 ResourceBuilder.CreateDefault()
                     .AddTelemetrySdk()
                     .AddService(serviceName: serviceName, serviceVersion: serviceVersion ?? "0.0.0")
-                    .AddDigmaAttributes(configure => {configure.CommitId = commitHash;}))
+                    .AddDigmaAttributes(configure =>
+                    {
+                        if(commitHash is not null) configure.CommitId = commitHash;
+                    }))
                 .AddOtlpExporter(c =>
                 {
                     c.Endpoint = new Uri(digmaUrl);

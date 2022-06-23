@@ -2,15 +2,18 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Mvc;
+using OpenTelemetry.Trace;
 
 namespace Sample.MoneyTransfer.API.Controllers;
 
 class SampleInsightsService
 {
+    private static readonly ActivitySource Activity = new(nameof(SampleInsightsService));
+
     private void Connect()
     {
         throw new ConnectionAbortedException("aborting connection");
-    }
+    } 
     public void DoSomething()
     {
         Connect();
@@ -18,6 +21,32 @@ class SampleInsightsService
     public void DoSomethingElse()
     {
         Connect();
+    }
+
+    public void ThrowArgumentException()
+    {
+        using var activity = Activity.StartActivity("Rethrow2");
+        {
+            throw new ArgumentException("empty argument2");
+        }
+
+    }
+    
+    public void HandledException()
+    {
+        using var activity = Activity.StartActivity("HandledException");
+        {
+            try
+            {
+                throw new ArgumentException("empty argument");
+            }
+            catch (Exception ex)
+            {
+                activity.RecordException(ex);
+            }
+            
+        }
+
     }
 }
 [ApiController]
@@ -33,10 +62,54 @@ public class SampleInsightsController  : ControllerBase
     }
     
     [HttpGet]
+    [Route("Rethrow2")]
+    public async Task Rethrow2()
+    {
+        using var activity = Activity.StartActivity("Rethrow2");
+        await Task.Delay(TimeSpan.FromMilliseconds(1));
+        try
+        {
+            _service.ThrowArgumentException();
+        }
+        catch(Exception ex)
+        {
+            activity.RecordException(ex);
+            throw new ArgumentException("empty argument", ex);
+        }
+        
+    }
+
+    [HttpGet]
+    [Route("Rethrow1")]
+    public async Task Rethrow1()
+    {
+        using var activity = Activity.StartActivity("Rethrow1");
+        await Task.Delay(TimeSpan.FromMilliseconds(1));
+        try
+        {
+            _service.ThrowArgumentException();
+        }
+        catch(Exception ex)
+        {
+            throw new ArgumentException("empty argument", ex);
+        }
+    }
+    
+    [HttpGet]
+    [Route("Handled")]
+    public async Task Handled()
+    {
+        using var activity = Activity.StartActivity("Handled");
+        await Task.Delay(TimeSpan.FromMilliseconds(1));
+        _service.HandledException();
+        throw new ArgumentException("empty argument");
+    }
+    
+    [HttpGet]
     [Route("ErrorSource")]
     public async Task ErrorSource()
     {
-        using var activity = Activity.StartActivity(nameof(ErrorSource));
+        using var activity = Activity.StartActivity("ErrorSource");
         await Task.Delay(TimeSpan.FromMilliseconds(1));
         if (Random.Next(1, 10) % 2 == 0)
         {
@@ -52,7 +125,7 @@ public class SampleInsightsController  : ControllerBase
     [Route("Error")]
     public async Task Error()
     {
-        using var activity = Activity.StartActivity(nameof(Error));
+        using var activity = Activity.StartActivity("Error");
         await Task.Delay(TimeSpan.FromMilliseconds(1));
         if (Random.Next(1, 10) % 2 == 0)
         {
