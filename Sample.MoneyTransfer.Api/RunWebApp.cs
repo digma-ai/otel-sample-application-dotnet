@@ -33,6 +33,8 @@ public class RunWebApp
             //Optional for dev context only
             string ? commitHash = SCMUtils.GetLocalCommitHash(builder);
 
+            Console.WriteLine($"GetLocalCommitHash: {commitHash}");
+
             //Configure opentelemetry
             builder.Services.AddOpenTelemetryTracing(builder => builder
                 .AddAspNetCoreInstrumentation(options =>{options.RecordException = true;})
