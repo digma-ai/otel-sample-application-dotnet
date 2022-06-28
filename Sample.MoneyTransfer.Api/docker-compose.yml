@@ -1,5 +1,4 @@
 version: '3.6'
-name: 'digma-sample'
 services:
   money-transfer.api:
     image: digma/sample.money-transfer:latest
