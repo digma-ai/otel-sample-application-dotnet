@@ -5,6 +5,7 @@ using OpenTelemetry.Instrumentation.Digma;
 using Sample.MoneyTransfer.API.Utils;
 using Sample.MoneyTransfer.API.Data;
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Exporter;
 using Sample.MoneyTransfer.API.Domain.Services;
 
 namespace Sample.MoneyTransfer.API;
@@ -29,6 +30,8 @@ public class RunWebApp
             var serviceVersion = typeof(RunWebApp).Assembly.GetName().Version!.ToString();
 
             Console.WriteLine($"DEPLOYMENT_COMMIT_ID={Environment.GetEnvironmentVariable("DEPLOYMENT_COMMIT_ID")}");
+            Console.WriteLine($"DEPLOYMENT_ENVIORNMENT={Environment.GetEnvironmentVariable("DEPLOYMENT_ENVIORNMENT")}");
+
             
             //Optional for dev context only
             string ? commitHash = SCMUtils.GetLocalCommitHash(builder);
