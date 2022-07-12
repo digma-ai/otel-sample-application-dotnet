@@ -77,7 +77,7 @@ class SampleInsightsService
 public class SampleInsightsController  : ControllerBase
 {
     private static readonly ActivitySource Activity = new(nameof(SampleInsightsController));
-    private static readonly Random Random = new();
+    private static readonly Random Random = new (Math.Abs((int)DateTime.Now.Ticks));
     private readonly SampleInsightsService _service;
     public SampleInsightsController()
     {
