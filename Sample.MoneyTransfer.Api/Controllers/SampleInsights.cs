@@ -13,34 +13,40 @@ class SampleInsightsService
     private void Connect()
     {
         throw new ConnectionAbortedException("aborting connection");
-    } 
-    
+    }
+
     // method DoSomething has Overloading implementations
     public void DoSomething()
     {
         Connect();
     }
+
     public void DoSomething(int int1)
     {
         Connect();
     }
+
     public void DoSomething(string str1)
     {
         Connect();
     }
+
     public void DoSomething(string str1, out bool bool1, IList<string> list1)
     {
         bool1 = true;
         Connect();
     }
+
     public void DoSomething(ref long[] longsArr1, IEnumerable<string> enumerable1)
     {
         Connect();
     }
+
     public void DoSomething(IDictionary<string, string> dict1, int[] intsArr1)
     {
         Connect();
     }
+
     public void DoSomethingElse()
     {
         Connect();
@@ -52,9 +58,8 @@ class SampleInsightsService
         {
             throw new ArgumentException("empty argument2");
         }
-
     }
-    
+
     public void HandledException()
     {
         using var activity = Activity.StartActivity("HandledException");
@@ -67,23 +72,23 @@ class SampleInsightsService
             {
                 activity.RecordException(ex);
             }
-            
         }
-
     }
 }
+
 [ApiController]
 [Route("[controller]")]
-public class SampleInsightsController  : ControllerBase
+public class SampleInsightsController : ControllerBase
 {
     private static readonly ActivitySource Activity = new(nameof(SampleInsightsController));
-    private static readonly Random Random = new (Math.Abs((int)DateTime.Now.Ticks));
+    private static readonly Random Random = new(Math.Abs((int)DateTime.Now.Ticks));
     private readonly SampleInsightsService _service;
+
     public SampleInsightsController()
     {
         _service = new SampleInsightsService();
     }
-    
+
     [HttpGet]
     [Route("Rethrow2")]
     public async Task Rethrow2()
@@ -94,12 +99,11 @@ public class SampleInsightsController  : ControllerBase
         {
             _service.ThrowArgumentException();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             activity.RecordException(ex);
             throw new ArgumentException("empty argument", ex);
         }
-        
     }
 
     [HttpGet]
@@ -112,12 +116,12 @@ public class SampleInsightsController  : ControllerBase
         {
             _service.ThrowArgumentException();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             throw new ArgumentException("empty argument", ex);
         }
     }
-    
+
     [HttpGet]
     [Route("Handled")]
     public async Task Handled()
@@ -127,7 +131,7 @@ public class SampleInsightsController  : ControllerBase
         _service.HandledException();
         throw new ArgumentException("empty argument");
     }
-    
+
     [HttpGet]
     [Route("ErrorSource")]
     public async Task ErrorSource()
@@ -179,14 +183,14 @@ public class SampleInsightsController  : ControllerBase
 
         throw new ValidationException("random validation error");
     }
-    
+
     [HttpGet]
     [Route("SlowEndpoint")]
-    public async Task SlowEndpoint([FromQuery]int extraLatency)
+    public async Task SlowEndpoint([FromQuery] int extraLatency)
     {
         await Task.Delay(extraLatency);
     }
-    
+
     [HttpGet]
     [Route("SpanBottleneck")]
     public async Task SpanBottleneck()
@@ -197,7 +201,7 @@ public class SampleInsightsController  : ControllerBase
         using var activity2 = Activity.StartActivity("SpanBottleneck 2");
         await Task.Delay(TimeSpan.FromMilliseconds(100));
     }
-    
+
     [HttpGet]
     [Route("OverloadingA1")]
     public async Task MethodOverloadingA([FromQuery] String name)
@@ -214,7 +218,8 @@ public class SampleInsightsController  : ControllerBase
 
     [HttpGet]
     [Route("OverloadingA3")]
-    public async Task MethodOverloadingA([FromQuery] String name, [FromQuery] String description, [FromQuery] long longId)
+    public async Task MethodOverloadingA([FromQuery] String name, [FromQuery] String description,
+        [FromQuery] long longId)
     {
         await Task.Delay(TimeSpan.FromMilliseconds(13));
     }
@@ -230,19 +235,18 @@ public class SampleInsightsController  : ControllerBase
     {
         await Task.Delay(TimeSpan.FromMilliseconds(5));
     }
-    
+
     [HttpGet]
     [Route("NormalUsage")]
     public async Task NormalUsage()
     {
         await Task.Delay(TimeSpan.FromMilliseconds(5));
     }
-    
+
     [HttpGet]
     [Route("HighUsage")]
     public async Task HighUsage()
     {
         await Task.Delay(TimeSpan.FromMilliseconds(5));
     }
-    
 }
