@@ -14,7 +14,30 @@ class SampleInsightsService
     {
         throw new ConnectionAbortedException("aborting connection");
     } 
+    
+    // method DoSomething has Overloading implementations
     public void DoSomething()
+    {
+        Connect();
+    }
+    public void DoSomething(int int1)
+    {
+        Connect();
+    }
+    public void DoSomething(string str1)
+    {
+        Connect();
+    }
+    public void DoSomething(string str1, out bool bool1, IList<string> list1)
+    {
+        bool1 = true;
+        Connect();
+    }
+    public void DoSomething(ref long[] longsArr1, IEnumerable<string> enumerable1)
+    {
+        Connect();
+    }
+    public void DoSomething(IDictionary<string, string> dict1, int[] intsArr1)
     {
         Connect();
     }
@@ -111,16 +134,38 @@ public class SampleInsightsController  : ControllerBase
     {
         using var activity = Activity.StartActivity("ErrorSource");
         await Task.Delay(TimeSpan.FromMilliseconds(1));
-        if (Random.Next(1, 10) % 2 == 0)
+
+        var randVal = Random.Next(1, 9);
+        switch (randVal)
         {
-            _service.DoSomething();
-        }
-        else
-        {
-             _service.DoSomethingElse();
+            case 1:
+                _service.DoSomethingElse();
+                break;
+            case 2:
+                _service.DoSomething();
+                break;
+            case 3:
+                _service.DoSomething(3);
+                break;
+            case 4:
+                _service.DoSomething("lets go");
+                break;
+            case 5:
+                _service.DoSomething("yes", out bool bool1, new List<string>());
+                break;
+            case 6:
+                var longsArr = new long[] { };
+                _service.DoSomething(ref longsArr, new string[] { });
+                break;
+            case 7:
+                _service.DoSomething(new Dictionary<string, string>(), new int[] { });
+                break;
+            default:
+                _service.DoSomething();
+                break;
         }
     }
-    
+
     [HttpGet]
     [Route("Error")]
     public async Task Error()
