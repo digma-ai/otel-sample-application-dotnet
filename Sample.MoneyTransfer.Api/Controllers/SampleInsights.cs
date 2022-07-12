@@ -153,6 +153,27 @@ public class SampleInsightsController  : ControllerBase
         await Task.Delay(TimeSpan.FromMilliseconds(100));
     }
     
+    [HttpGet]
+    [Route("OverloadingA1")]
+    public async Task MethodOverloadingA([FromQuery] String name)
+    {
+        await Task.Delay(TimeSpan.FromMilliseconds(11));
+    }
+
+    [HttpGet]
+    [Route("OverloadingA2")]
+    public async Task MethodOverloadingA([FromQuery] String name, [FromQuery] int[] ids)
+    {
+        await Task.Delay(TimeSpan.FromMilliseconds(12));
+    }
+
+    [HttpGet]
+    [Route("OverloadingA3")]
+    public async Task MethodOverloadingA([FromQuery] String name, [FromQuery] String description, [FromQuery] long longId)
+    {
+        await Task.Delay(TimeSpan.FromMilliseconds(13));
+    }
+
     /*
      *1       1  
      * *3     10 mid

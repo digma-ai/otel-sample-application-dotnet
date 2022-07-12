@@ -30,7 +30,7 @@ public class InsightDataGenerator
         }
         
         Console.WriteLine("***** generate slow endpoint insight *****");
-        for (int i = 0; i < 1; i++)
+        for (int i = 0; i < 2; i++)
         {
             HttpResponseMessage response = await _client.GetAsync($"{_url}/SampleInsights/SlowEndpoint?extraLatency=5000");
             Console.WriteLine(response.StatusCode);
@@ -60,6 +60,25 @@ public class InsightDataGenerator
             Console.WriteLine(response.StatusCode);
         }
         
+        Console.WriteLine("***** generate endpoints with method overloading A1 *****");
+        for (int i = 0; i < 5; i++)
+        {
+            HttpResponseMessage response = await _client.GetAsync($"{_url}/SampleInsights/OverloadingA1?name=someName{i}");
+            Console.WriteLine(response.StatusCode);
+        }
+        Console.WriteLine("***** generate endpoints with method overloading A2 *****");
+        for (int i = 0; i < 9; i++)
+        {
+            HttpResponseMessage response = await _client.GetAsync($"{_url}/SampleInsights/OverloadingA2?name=someName{i}&ids={i + 1}&ids={i + 102}");
+            Console.WriteLine(response.StatusCode);
+        }
+        Console.WriteLine("***** generate endpoints with method overloading A3 *****");
+        for (int i = 0; i < 3; i++)
+        {
+            HttpResponseMessage response = await _client.GetAsync($"{_url}/SampleInsights/OverloadingA3?name=someName{i}&description=someDesc{i}&longId={i + 1000}");
+            Console.WriteLine(response.StatusCode);
+        }
+
         Console.WriteLine("***** generate high usage insight *****");
         for (int i = 0; i < 400; i++)
         {
