@@ -37,12 +37,22 @@ class SampleInsightsService
         Connect();
     }
 
-    public void DoSomething(ref long[] longsArr1, IEnumerable<string> enumerable1)
+    public void DoSomething(ref long[] longsArr1, IEnumerable<string> enumerable1, Func<int, string> func1)
     {
         Connect();
     }
 
-    public void DoSomething(IDictionary<string, string> dict1, int[] intsArr1)
+    public void DoSomething(IDictionary<string, string> dict1, double[][][] doublesJaggedArr1)
+    {
+        Connect();
+    }
+
+    public void DoSomething(ICollection<object> objectsColl1, long[,,][,,,,][,][,,,] longsMultidimensionalArr1)
+    {
+        Connect();
+    }
+
+    public void DoSomething(Func<int, int, string> func1, float[][,,,][][,,] floatsMixJaggedAndMultidimensionalArr1)
     {
         Connect();
     }
@@ -139,7 +149,7 @@ public class SampleInsightsController : ControllerBase
         using var activity = Activity.StartActivity("ErrorSource");
         await Task.Delay(TimeSpan.FromMilliseconds(1));
 
-        var randVal = Random.Next(1, 9);
+        var randVal = Random.Next(1, 11);
         switch (randVal)
         {
             case 1:
@@ -159,10 +169,16 @@ public class SampleInsightsController : ControllerBase
                 break;
             case 6:
                 var longsArr = new long[] { };
-                _service.DoSomething(ref longsArr, new string[] { });
+                _service.DoSomething(ref longsArr, new string[] { }, x => $"val={x}");
                 break;
             case 7:
-                _service.DoSomething(new Dictionary<string, string>(), new int[] { });
+                _service.DoSomething(new Dictionary<string, string>(), new double[][][] { });
+                break;
+            case 8:
+                _service.DoSomething(new object[] { }, new long[,,][,,,,][,][,,,] { });
+                break;
+            case 9:
+                _service.DoSomething((x, y) => $"sum={x + y}", new float[][,,,][][,,] { });
                 break;
             default:
                 _service.DoSomething();
