@@ -10,9 +10,14 @@ class SampleInsightsService
 {
     private static readonly ActivitySource Activity = new(nameof(SampleInsightsService));
 
+    private void Connect(string connectionName)
+    {
+        throw new ConnectionAbortedException($"aborting connection named {connectionName}");
+    }
+
     private void Connect()
     {
-        throw new ConnectionAbortedException("aborting connection");
+        Connect("basic");
     }
 
     // method DoSomething has Overloading implementations
@@ -23,23 +28,24 @@ class SampleInsightsService
 
     public void DoSomething(int int1)
     {
-        Connect();
+        Connect($"basic{int1}");
     }
 
     public void DoSomething(string str1)
     {
-        Connect();
+        Connect(str1);
     }
 
     public void DoSomething(string str1, out bool bool1, IList<string> list1)
     {
         bool1 = true;
-        Connect();
+        Connect(str1);
     }
 
     public void DoSomething(ref long[] longsArr1, IEnumerable<string> enumerable1, Func<int, string> func1)
     {
-        Connect();
+        var str = func1.Invoke(7);
+        Connect(str);
     }
 
     public void DoSomething(IDictionary<string, string> dict1, double[][][] doublesJaggedArr1)
@@ -54,12 +60,13 @@ class SampleInsightsService
 
     public void DoSomething(Func<int, int, string> func1, float[][,,,][][,,] floatsMixJaggedAndMultidimensionalArr1)
     {
-        Connect();
+        var str = func1.Invoke(7, 8);
+        Connect(str);
     }
 
     public void DoSomethingElse()
     {
-        Connect();
+        Connect("else");
     }
 
     public void ThrowArgumentException()
