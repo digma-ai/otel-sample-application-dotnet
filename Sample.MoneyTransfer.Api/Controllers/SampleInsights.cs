@@ -36,10 +36,15 @@ class SampleInsightsService
         Connect(str1);
     }
 
-    public void DoSomething(string str1, out bool bool1, IList<string> list1)
+    public void DoSomething(string str1, out bool bool1, IList<string[][,,]> listOfArray)
     {
         bool1 = true;
         Connect(str1);
+    }
+
+    public void DoSomething(List<dynamic>[] arrayOfList, ref int int1)
+    {
+        Connect();
     }
 
     public void DoSomething(ref long[] longsArr1, IEnumerable<string> enumerable1, Func<int, string> func1)
@@ -48,7 +53,7 @@ class SampleInsightsService
         Connect(str);
     }
 
-    public void DoSomething(IDictionary<string, string> dict1, double[][][] doublesJaggedArr1)
+    public void DoSomething(IDictionary<string, IList<Func<int[]>>> dict1, double[][][] doublesJaggedArr1)
     {
         Connect();
     }
@@ -156,7 +161,7 @@ public class SampleInsightsController : ControllerBase
         using var activity = Activity.StartActivity("ErrorSource");
         await Task.Delay(TimeSpan.FromMilliseconds(1));
 
-        var randVal = Random.Next(1, 11);
+        var randVal = Random.Next(1, 12);
         switch (randVal)
         {
             case 1:
@@ -172,19 +177,23 @@ public class SampleInsightsController : ControllerBase
                 _service.DoSomething("lets go");
                 break;
             case 5:
-                _service.DoSomething("yes", out bool bool1, new List<string>());
+                _service.DoSomething("yes", out bool bool1, new List<string[][,,]>());
                 break;
             case 6:
+                int int1 = 5;
+                _service.DoSomething(new[] { new List<dynamic>() }, ref int1);
+                break;
+            case 7:
                 var longsArr = new long[] { };
                 _service.DoSomething(ref longsArr, new string[] { }, x => $"val={x}");
                 break;
-            case 7:
-                _service.DoSomething(new Dictionary<string, string>(), new double[][][] { });
-                break;
             case 8:
-                _service.DoSomething(new object[] { }, new long[,,][,,,,][,][,,,] { });
+                _service.DoSomething(new Dictionary<string, IList<Func<int[]>>>(), new double[][][] { });
                 break;
             case 9:
+                _service.DoSomething(new object[] { }, new long[,,][,,,,][,][,,,] { });
+                break;
+            case 10:
                 _service.DoSomething((x, y) => $"sum={x + y}", new float[][,,,][][,,] { });
                 break;
             default:
