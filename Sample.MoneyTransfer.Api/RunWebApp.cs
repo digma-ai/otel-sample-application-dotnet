@@ -6,6 +6,7 @@ using Sample.MoneyTransfer.API.Utils;
 using Sample.MoneyTransfer.API.Data;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Exporter;
+using OpenTelemetry.Instrumentation.Digma.Diagnostic;
 using Sample.MoneyTransfer.API.Domain.Services;
 
 namespace Sample.MoneyTransfer.API;
@@ -23,7 +24,7 @@ public class RunWebApp
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.AddEndpointMonitoring();
+            builder.Services.UseDigmaHttpDiagnosticObserver();
             var digmaUrl = builder.Configuration.GetSection("Digma").GetValue<string>("URL");
             Console.WriteLine($"Digma Url: {digmaUrl}");
             var serviceName = typeof(RunWebApp).Assembly.GetName().Name;
@@ -51,11 +52,14 @@ public class RunWebApp
                             if(commitHash is not null) configure.CommitId = commitHash;
                             configure.SpanMappingPattern = @"(?<ns>[\S\.]+)\/(?<class>\S+)\.(?<method>\S+)";
                             configure.SpanMappingReplacement = @"${ns}.Controllers.${class}.${method}";
+                            configure.Environment = "Test";
                         })
                 )
                 .AddOtlpExporter(c =>
                 {
+                    
                     c.Endpoint = new Uri(digmaUrl);
+                    c.Protocol = OtlpExportProtocol.Grpc;
                 })
                 .AddSource("*")
             );  
