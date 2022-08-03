@@ -1,12 +1,14 @@
-﻿using OpenTelemetry.Trace;
+﻿using Digma.MassTransit.Integration;
+using MassTransit;
+using OpenTelemetry.Trace;
 using OpenTelemetry.Resources;
-using OpenTelemetry.Metrics;
 using OpenTelemetry.Instrumentation.Digma;
 using Sample.MoneyTransfer.API.Utils;
 using Sample.MoneyTransfer.API.Data;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.Digma.Diagnostic;
+using Sample.MoneyTransfer.API.Consumer;
 using Sample.MoneyTransfer.API.Domain.Services;
 
 namespace Sample.MoneyTransfer.API;
@@ -24,7 +26,8 @@ public class RunWebApp
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.UseDigmaHttpDiagnosticObserver();
+            builder.Services.AddTransient<TransferFundsEventConsumer>();
+            
             var digmaUrl = builder.Configuration.GetSection("Digma").GetValue<string>("URL");
             Console.WriteLine($"Digma Url: {digmaUrl}");
             var serviceName = typeof(RunWebApp).Assembly.GetName().Name;
@@ -33,11 +36,55 @@ public class RunWebApp
             Console.WriteLine($"DEPLOYMENT_COMMIT_ID={Environment.GetEnvironmentVariable("DEPLOYMENT_COMMIT_ID")}");
             Console.WriteLine($"DEPLOYMENT_ENVIORNMENT={Environment.GetEnvironmentVariable("DEPLOYMENT_ENV")}");
 
+            var rabbitSection = builder.Configuration.GetSection("RabbitMq");
+            if (rabbitSection.Exists())
+            {
+                builder.Services.AddTransient<IMessagePublisher, MessagePublisher>();
+                builder.Services.AddMassTransit(o =>
+                {
+                    o.SetKebabCaseEndpointNameFormatter();
+                    o.AddConsumer<TransferFundsEventConsumer>();
+                    o.UsingRabbitMq((context, configurator) =>
+                    {  
+                        var configuration = context.GetService<IConfiguration>();
+                        var host = configuration.GetValue<string>("RabbitMq:Host");
+                        var userName = configuration.GetValue<string>("RabbitMq:Username");
+                        var password = configuration.GetValue<string>("RabbitMq:Password");
+                        configurator.Host(host, c =>
+                        {
+                            c.Username(userName);
+                            c.Password(password);
+                        });
+                        
+                        configurator.ReceiveEndpoint(KebabCaseEndpointNameFormatter.Instance.Consumer<TransferFundsEventConsumer>(), c => {
+                             c.ConfigureConsumer<TransferFundsEventConsumer>(context);
+                        });
+                        configurator.ConfigureEndpoints(context);
+                    });
+                });
+                
+                builder.Services.AddOptions<MassTransitHostOptions>().Configure(o =>
+                {
+                    o.WaitUntilStarted = true; 
+                });
+            }
+            else
+            {
+                builder.Services.AddTransient<IMessagePublisher, DoNothingMessagePublisher>();
+
+            }
+           
+            
             
             //Optional for dev context only
             string ? commitHash = SCMUtils.GetLocalCommitHash(builder);
 
             Console.WriteLine($"GetLocalCommitHash: {commitHash}");
+            builder.Services.UseDigmaHttpDiagnosticObserver();
+            builder.Services.UseDigmaMassTransitConsumeObserver(o =>
+            {
+                o.Observe<TransferFundsEventConsumer>();
+            });
 
             //Configure opentelemetry
             builder.Services.AddOpenTelemetryTracing(builder => builder
