@@ -1,5 +1,6 @@
 ﻿using Digma.MassTransit.Integration;
 using MassTransit;
+using MassTransit.Definition;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Instrumentation.Digma;
@@ -10,6 +11,7 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.Digma.Diagnostic;
 using Sample.MoneyTransfer.API.Consumer;
 using Sample.MoneyTransfer.API.Domain.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Sample.MoneyTransfer.API;
 
@@ -39,11 +41,13 @@ public class RunWebApp
             var rabbitSection = builder.Configuration.GetSection("RabbitMq");
             if (rabbitSection.Exists())
             {
+                builder.Services.AddMassTransitHostedService();
                 builder.Services.AddTransient<IMessagePublisher, MessagePublisher>();
                 builder.Services.AddMassTransit(o =>
                 {
                     o.SetKebabCaseEndpointNameFormatter();
                     o.AddConsumer<TransferFundsEventConsumer>();
+                    
                     o.UsingRabbitMq((context, configurator) =>
                     {  
                         var configuration = context.GetService<IConfiguration>();
@@ -61,11 +65,6 @@ public class RunWebApp
                         });
                         configurator.ConfigureEndpoints(context);
                     });
-                });
-                
-                builder.Services.AddOptions<MassTransitHostOptions>().Configure(o =>
-                {
-                    o.WaitUntilStarted = true; 
                 });
             }
             else
@@ -90,6 +89,7 @@ public class RunWebApp
             builder.Services.AddOpenTelemetryTracing(builder => builder
                 .AddAspNetCoreInstrumentation(options =>{options.RecordException = true;})
                 .AddHttpClientInstrumentation()
+                .AddMassTransitInstrumentation()
                 .SetResourceBuilder(
                     ResourceBuilder.CreateDefault()
                         .AddTelemetrySdk()
