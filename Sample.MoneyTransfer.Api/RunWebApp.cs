@@ -99,7 +99,6 @@ public class RunWebApp
                             if(commitHash is not null) configure.CommitId = commitHash;
                             configure.SpanMappingPattern = @"(?<ns>[\S\.]+)\/(?<class>\S+)\.(?<method>\S+)";
                             configure.SpanMappingReplacement = @"${ns}.Controllers.${class}.${method}";
-                            configure.Environment = "Test";
                         })
                 )
                 .AddOtlpExporter(c =>
