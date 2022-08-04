@@ -86,6 +86,9 @@ public class InsightDataGenerator
                 await _client.GetAsync($"{_url}/SampleInsights/HighUsage");
             Console.WriteLine(response.StatusCode);
         }
+        
+        await _client.GetAsync($"{_url}/SampleInsights/Spans");
+        
         Console.WriteLine("***** END GenerateInsightData *****");
 
     }

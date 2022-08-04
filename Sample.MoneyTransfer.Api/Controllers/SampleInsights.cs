@@ -281,4 +281,31 @@ public class SampleInsightsController : ControllerBase
     {
         await Task.Delay(TimeSpan.FromMilliseconds(5));
     }
+
+    [HttpGet]
+    [Route("Spans")]
+    public async Task Spans()
+    {
+        using var a = Activity.StartActivity();
+        {
+            Thread.Sleep(5);
+        }
+        void Action()
+        {
+            using var b = Activity.StartActivity("Local func activity");
+            {
+                Thread.Sleep(5);
+            }
+        }
+ 
+        Action();
+        var action = ()=>{
+            using var c = Activity.StartActivity("Anonymous activity");
+            {
+                Thread.Sleep(5);
+            }
+        };
+        action();
+        await Task.CompletedTask;
+    }
 }
