@@ -11,45 +11,39 @@ permissions:
   packages: write
 
 jobs:
-  build-server-side:
+  build-server:
     uses: digma-ai/otel-sample-application-dotnet/.github/workflows/reusable-push-to-docker.yml@main
     with:
       images: |
-        arikdig/sample-app-dotnet-server
+        digmatic/sample-app-money-transfer-server
       tags: |
         type=schedule
         type=ref,event=branch
         type=ref,event=pr
         type=semver,pattern={{version}}
-        type=semver,pattern={{major}}.{{minor}}
-        type=semver,pattern={{major}}
-        type=sha
         # set latest tag for main branch
         type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
       dockerfile: ./Sample.MoneyTransfer.Api/Dockerfile
     secrets:
       GH_PAT: ${{ secrets.TMP_GH_PAT }}
-      REGISTRY_USERNAME: ${{ secrets.TMP_DH_USER }}
-      REGISTRY_PASSWORD: ${{ secrets.TMP_DH_TOKEN }}
+      REGISTRY_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      REGISTRY_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
 
 
-  build-client-side:
+  build-client:
     uses: digma-ai/otel-sample-application-dotnet/.github/workflows/reusable-push-to-docker.yml@main
     with:
       images: |
-        arikdig/sample-app-dotnet-client
+        digmatic/sample-app-money-transfer-client
       tags: |
         type=schedule
         type=ref,event=branch
         type=ref,event=pr
         type=semver,pattern={{version}}
-        type=semver,pattern={{major}}.{{minor}}
-        type=semver,pattern={{major}}
-        type=sha
         # set latest tag for main branch
         type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
       dockerfile: ./Sample.Client.Test/Dockerfile
     secrets:
       GH_PAT: ${{ secrets.TMP_GH_PAT }}
-      REGISTRY_USERNAME: ${{ secrets.TMP_DH_USER }}
-      REGISTRY_PASSWORD: ${{ secrets.TMP_DH_TOKEN }}
+      REGISTRY_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      REGISTRY_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
