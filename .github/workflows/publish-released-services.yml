@@ -1,0 +1,55 @@
+name: Publish released images
+
+# Controls when the workflow will run
+on:
+  workflow_dispatch:
+  release:
+    types: [released]
+
+# permissions are needed if pushing to ghcr.io
+permissions: 
+  packages: write
+
+jobs:
+  build-server-side:
+    uses: digma-ai/otel-sample-application-dotnet/.github/workflows/reusable-push-to-docker.yml@main
+    with:
+      images: |
+        arikdig/sample-app-dotnet-server
+      tags: |
+        type=schedule
+        type=ref,event=branch
+        type=ref,event=pr
+        type=semver,pattern={{version}}
+        type=semver,pattern={{major}}.{{minor}}
+        type=semver,pattern={{major}}
+        type=sha
+        # set latest tag for main branch
+        type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
+      dockerfile: ./Sample.MoneyTransfer.Api/Dockerfile
+    secrets:
+      GH_PAT: ${{ secrets.TMP_GH_PAT }}
+      REGISTRY_USERNAME: ${{ secrets.TMP_DH_USER }}
+      REGISTRY_PASSWORD: ${{ secrets.TMP_DH_TOKEN }}
+
+
+  build-client-side:
+    uses: digma-ai/otel-sample-application-dotnet/.github/workflows/reusable-push-to-docker.yml@main
+    with:
+      images: |
+        arikdig/sample-app-dotnet-client
+      tags: |
+        type=schedule
+        type=ref,event=branch
+        type=ref,event=pr
+        type=semver,pattern={{version}}
+        type=semver,pattern={{major}}.{{minor}}
+        type=semver,pattern={{major}}
+        type=sha
+        # set latest tag for main branch
+        type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
+      dockerfile: ./Sample.Client.Test/Dockerfile
+    secrets:
+      GH_PAT: ${{ secrets.TMP_GH_PAT }}
+      REGISTRY_USERNAME: ${{ secrets.TMP_DH_USER }}
+      REGISTRY_PASSWORD: ${{ secrets.TMP_DH_TOKEN }}
