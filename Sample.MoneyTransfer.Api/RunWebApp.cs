@@ -1,4 +1,5 @@
-﻿using Digma.MassTransit.Integration;
+﻿using Automatonymous;
+using Digma.MassTransit.Integration;
 using MassTransit;
 using MassTransit.Definition;
 using OpenTelemetry.Trace;
@@ -12,6 +13,8 @@ using OpenTelemetry.Instrumentation.Digma.Diagnostic;
 using Sample.MoneyTransfer.API.Consumer;
 using Sample.MoneyTransfer.API.Domain.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Sample.Consumer;
+using Sample.ReportTracking;
 
 namespace Sample.MoneyTransfer.API;
 
@@ -45,8 +48,11 @@ public class RunWebApp
                 builder.Services.AddTransient<IMessagePublisher, MessagePublisher>();
                 builder.Services.AddMassTransit(o =>
                 {
+                    o.AddSagaStateMachine<ReportStateMachine,ReportSagaState>().InMemoryRepository();
                     o.SetKebabCaseEndpointNameFormatter();
                     o.AddConsumer<TransferFundsEventConsumer>();
+                    o.AddConsumer<ReportRequestReceivedConsumer>();
+
                     
                     o.UsingRabbitMq((context, configurator) =>
                     {  
@@ -62,6 +68,10 @@ public class RunWebApp
                         
                         configurator.ReceiveEndpoint(KebabCaseEndpointNameFormatter.Instance.Consumer<TransferFundsEventConsumer>(), c => {
                              c.ConfigureConsumer<TransferFundsEventConsumer>(context);
+                        });
+                        
+                        configurator.ReceiveEndpoint(KebabCaseEndpointNameFormatter.Instance.Consumer<ReportRequestReceivedConsumer>(), c => {
+                            c.ConfigureConsumer<ReportRequestReceivedConsumer>(context);
                         });
                         configurator.ConfigureEndpoints(context);
                     });
@@ -87,7 +97,8 @@ public class RunWebApp
 
             //Configure opentelemetry
             builder.Services.AddOpenTelemetryTracing(builder => builder
-                .AddAspNetCoreInstrumentation(options =>{options.RecordException = true;})
+                .AddAspNetCoreInstrumentation(options =>
+                    {options.RecordException = true;})
                 .AddHttpClientInstrumentation()
                 .AddMassTransitInstrumentation()
                 .SetResourceBuilder(
@@ -96,6 +107,7 @@ public class RunWebApp
                         .AddService(serviceName: serviceName, serviceVersion: serviceVersion ?? "0.0.0")
                         .AddDigmaAttributes(configure =>
                         {
+                            configure.Environment = "CI";
                             if(commitHash is not null) configure.CommitId = commitHash;
                             configure.SpanMappingPattern = @"(?<ns>[\S\.]+)\/(?<class>\S+)\.(?<method>\S+)";
                             configure.SpanMappingReplacement = @"${ns}.Controllers.${class}.${method}";
@@ -141,4 +153,6 @@ public class RunWebApp
 
     
 }
+
+
 

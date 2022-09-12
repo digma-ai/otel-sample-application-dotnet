@@ -55,7 +55,7 @@ namespace Sample.MoneyTransfer.API.Controllers
             {
                 return NotFound();
             }
-
+            
             return new AccountDto { AccountId=account.Id, AccountName=account.AccountName};
         }
     }

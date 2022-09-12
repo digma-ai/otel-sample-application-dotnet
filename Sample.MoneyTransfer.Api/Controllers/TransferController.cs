@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Automatonymous;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Sample.MoneyTransfer.API.Consumer;
@@ -6,6 +7,7 @@ using Sample.MoneyTransfer.API.Data;
 using Sample.MoneyTransfer.API.Domain.Services;
 using Sample.MoneyTransfer.API.DTO;
 using Sample.MoneyTransfer.API.Utils;
+using Sample.ReportTracking;
 
 namespace Sample.MoneyTransfer.API.Controllers;
 
@@ -22,7 +24,8 @@ public class TransferController : ControllerBase
     public TransferController(Gringotts  moneyVault,
                               ILogger<TransferController> logger,
                               IMoneyTransferDomainService moneyTransferDomainService,
-                              IMessagePublisher messagePublisher)
+                              IMessagePublisher messagePublisher
+                              )
     {
         this.moneyVault = moneyVault;
         _logger = logger;
@@ -33,13 +36,24 @@ public class TransferController : ControllerBase
     [HttpPost(Name = "deposit")]
     public async Task DepositFunds(DepositRequest request)
     {
-        using (var activity = Activity.StartActivity("Sample.MoneyTransfer.API/TransferController.DepositFunds", ActivityKind.Internal))
-        {
-            var account = await moneyVault.Accounts.FindAsync(request.AccountId);
-            await moneyTransferDomainService.DepositeFunds(account.Id, request.Amount);
-        }
+        using var activity = Activity.StartActivity();
+
+        var account = await moneyVault.Accounts.FindAsync(request.AccountId);
+        await moneyTransferDomainService.DepositeFunds(account.Id, request.Amount);
+
+        await _messagePublisher.Publish(new ReportRequestReceivedEvent(
+            new ReportSagaState()
+            {
+                CustomerId = "customer-1234",
+                ReportId = "test",
+                RequestTime = DateTime.Now
+
+            })
+        );
+
+
     }
-    
+
     [HttpPost(Name = "transfer")]
     public async Task<TransferResult> TransferFunds(TransferRequest request)
     {
@@ -50,7 +64,7 @@ public class TransferController : ControllerBase
             await _messagePublisher.Publish(new TransferFundsEvent
             {
                 TransferRecord = transferRecord,
-                DelayInMS = 2000
+                DelayInMS = 3000
             });
             return new TransferResult { Success = true, TransferDate = transferRecord.TransferTime };
         }

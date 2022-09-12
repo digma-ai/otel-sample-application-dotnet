@@ -19,5 +19,9 @@ public class TransferFundsEventConsumer : IConsumer<TransferFundsEvent>
         using var activity = Activity.StartActivity("transfer funds event consumer");
         Console.Write($"Consume: {context.Message.TransferRecord.Id}");
         await Task.Delay(context.Message.DelayInMS);
+        var client = new HttpClient();
+        HttpResponseMessage? response = await client.GetAsync($"http://localhost:7151/Account/1");
+        Console.WriteLine(response.StatusCode);
+
     }
 }
