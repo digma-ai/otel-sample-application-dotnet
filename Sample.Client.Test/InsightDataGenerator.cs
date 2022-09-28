@@ -16,6 +16,21 @@ public class InsightDataGenerator
     {
         Console.WriteLine("***** START GenerateInsightData *****");
 
+        
+        Console.WriteLine("***** generate short delay *****");
+        for (int i = 0; i < 2000; i++)
+        {
+            HttpResponseMessage response = await _client.GetAsync($"{_url}/SampleInsights/Delay/10");
+            await Task.Delay(100);
+            Console.WriteLine($"{i}/2000");
+        }           
+        Console.WriteLine("***** generate long delay *****");
+        for (int i = 0; i < 2000; i++)
+        {
+            HttpResponseMessage response = await _client.GetAsync($"{_url}/SampleInsights/Delay/100");
+            Console.WriteLine(response.StatusCode);
+        }     
+        
         Console.WriteLine("***** generate errors source *****");
         for (int i = 0; i < 10; i++)
         {

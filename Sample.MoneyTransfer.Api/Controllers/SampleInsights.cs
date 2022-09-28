@@ -203,6 +203,13 @@ public class SampleInsightsController : ControllerBase
     }
 
     [HttpGet]
+    [Route("Delay/{milisec}")]
+    public async Task Delay(int milisec)
+    {
+        await Task.Delay(TimeSpan.FromMilliseconds(milisec));
+    }
+    
+    [HttpGet]
     [Route("Error")]
     public async Task Error()
     {
@@ -279,7 +286,7 @@ public class SampleInsightsController : ControllerBase
     [Route("HighUsage")]
     public async Task HighUsage()
     {
-        await Task.Delay(TimeSpan.FromMilliseconds(5));
+        await Task.Delay(TimeSpan.FromMilliseconds(80));
     }
 
     [HttpGet]
