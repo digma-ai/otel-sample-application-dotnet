@@ -11,6 +11,37 @@ public class InsightDataGenerator
         _url = url;
     }
 
+    public class Counter
+    {
+        public DateTime Value { get; set; } = DateTime.Now;
+
+        public bool Changed()
+        {
+            var now = DateTime.Now;
+            return new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second) !=
+                    new DateTime(Value.Year, Value.Month, Value.Day, Value.Hour, Value.Minute, Value.Second);
+        }
+    }
+    
+    public async Task GenerateDurationData(TimeSpan duration, int milisec)
+    {
+        Console.WriteLine("***** generate short delay *****");
+        
+        var timer = new System.Threading.Timer(async (e) =>
+        {
+            await _client.GetAsync($"{_url}/SampleInsights/Delay/{milisec}");
+            var counter = (Counter) e!;
+            if (counter.Changed())
+            {
+                Console.WriteLine(DateTime.Now);
+                counter.Value = DateTime.Now;
+            }
+        }, new Counter(), 0, 200);
+
+        await Task.Delay(duration);
+        await timer.DisposeAsync();
+    }
+    
     
     public async Task GenerateInsightData()
     {
