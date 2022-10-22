@@ -83,21 +83,36 @@ namespace Sample.MoneyTransfer.API.Domain.Services
 
         public async Task DepositeFunds(long accountId, int amount)
         {
-            var account = await RetrieveAccount(accountId);
-
+            
             using (var activity = Activity.StartActivity("Peristing balance increase", ActivityKind.Internal))
             {
+                var account = await RetrieveAccount(accountId);
+                
                 account.Balance += amount;
                 _ = await moneyVault.SaveChangesAsync();
+
+                if (account.Internal==false){
+                    using (var testActivity = Activity.StartActivity("confirm new balance", ActivityKind.Internal))
+                    {
+                        this.ConfirmTransaction();
+                    }
+                }
+                    
             }
+
+  
         }
-        
+
+     
+
         public MoneyTransferDomainService(Gringotts  context, ICreditProviderService creditProviderService)
         {
             this.moneyVault = context;
             this.creditProviderService = creditProviderService;
         }
 
-
+   private void ConfirmTransaction()
+        {
+        }
     }
 }

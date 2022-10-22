@@ -13,6 +13,7 @@ using OpenTelemetry.Instrumentation.Digma.Diagnostic;
 using Sample.MoneyTransfer.API.Consumer;
 using Sample.MoneyTransfer.API.Domain.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 using Sample.Consumer;
 using Sample.ReportTracking;
 
@@ -101,13 +102,14 @@ public class RunWebApp
                     {options.RecordException = true;})
                 .AddHttpClientInstrumentation()
                 .AddMassTransitInstrumentation()
+                .AddNpgsql()
                 .SetResourceBuilder(
                     ResourceBuilder.CreateDefault()
                         .AddTelemetrySdk()
                         .AddService(serviceName: serviceName, serviceVersion: serviceVersion ?? "0.0.0")
                         .AddDigmaAttributes(configure =>
                         {
-                            configure.Environment = "CI";
+                            configure.Environment = "Prod";
                             if(commitHash is not null) configure.CommitId = commitHash;
                             configure.SpanMappingPattern = @"(?<ns>[\S\.]+)\/(?<class>\S+)\.(?<method>\S+)";
                             configure.SpanMappingReplacement = @"${ns}.Controllers.${class}.${method}";
@@ -124,7 +126,7 @@ public class RunWebApp
 
             builder.Services
                 .AddDbContext<Gringotts >(options =>
-                    options.UseInMemoryDatabase(databaseName: "Vault"));
+                    options.UseNpgsql("Host=localhost;Database=money_transfer;Username=postgres;Password=postgres"));
 
         builder.Services.AddScoped<IMoneyTransferDomainService, MoneyTransferDomainService>();
 
