@@ -5,19 +5,19 @@ namespace Sample.ReportTracking
 {
     public class ReportCreatedEvent : IReportCreatedEvent
     {
-        private readonly ReportSagaState _reportSagaState;
-        public ReportCreatedEvent(ReportSagaState reportSagaState)
+        private readonly ReportSagaStateMore _reportSagaStateMore;
+        public ReportCreatedEvent(ReportSagaStateMore reportSagaStateMore)
         {
-            _reportSagaState = reportSagaState;
+            _reportSagaStateMore = reportSagaStateMore;
         }
 
-        public Guid CorrelationId => _reportSagaState.CorrelationId;
+        public Guid CorrelationId => _reportSagaStateMore.CorrelationId;
 
-        public string CustomerId => _reportSagaState.CustomerId;
-        public string ReportId => _reportSagaState.ReportId;
+        public string CustomerId => _reportSagaStateMore.CustomerId;
+        public string ReportId => _reportSagaStateMore.ReportId;
 
-        public string BlobUri => _reportSagaState.BlobUri;
+        public string BlobUri => _reportSagaStateMore.BlobUri;
 
-        public DateTime CreationTime => _reportSagaState.CreationTime;
+        public DateTime CreationTime => _reportSagaStateMore.CreationTime;
     }
 }

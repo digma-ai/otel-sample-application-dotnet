@@ -5,17 +5,17 @@ namespace Sample.ReportTracking
 {
     public class ReportFailedEvent : IReportFailedEvent
     {
-        private readonly ReportSagaState _reportSagaState;
-        public ReportFailedEvent(ReportSagaState reportSagaState)
+        private readonly ReportSagaStateMore _reportSagaStateMore;
+        public ReportFailedEvent(ReportSagaStateMore reportSagaStateMore)
         {
-            _reportSagaState = reportSagaState;
+            _reportSagaStateMore = reportSagaStateMore;
         }
 
-        public Guid CorrelationId => _reportSagaState.CorrelationId;
+        public Guid CorrelationId => _reportSagaStateMore.CorrelationId;
 
-        public string CustomerId => _reportSagaState.CustomerId;
-        public string ReportId => _reportSagaState.ReportId;
-        public string FaultMessage => _reportSagaState.FaultMessage;
-        public DateTime FaultTime => _reportSagaState.FaultTime;
+        public string CustomerId => _reportSagaStateMore.CustomerId;
+        public string ReportId => _reportSagaStateMore.ReportId;
+        public string FaultMessage => _reportSagaStateMore.FaultMessage;
+        public DateTime FaultTime => _reportSagaStateMore.FaultTime;
     }
 }

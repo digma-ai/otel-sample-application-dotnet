@@ -4,7 +4,7 @@ using Automatonymous;
 
 namespace Sample.ReportTracking
 {
-    public class ReportSagaState : SagaStateMachineInstance
+    public class ReportSagaStateMore : SagaStateMachineInstance
     {
         public Guid CorrelationId { get; set; }
         public State CurrentState { get; set; }

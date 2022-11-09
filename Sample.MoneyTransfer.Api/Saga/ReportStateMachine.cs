@@ -5,7 +5,7 @@ using Sample.Contracts;
 namespace Sample.ReportTracking
 {
 
-    public class ReportStateMachine : MassTransitStateMachine<ReportSagaState>
+    public class ReportStateMachine : MassTransitStateMachine<ReportSagaStateMore>
     {
         public State Submitted { get; private set; }
         public State Processed { get; private set; }
@@ -61,7 +61,7 @@ namespace Sample.ReportTracking
                     context.Instance.ReportId = context.Data.ReportId;
 
                     context.Instance.FaultMessage = context.Data.FaultMessage;
-                    context.Instance.FaultTime = context.Data.FaultTime; 
+                    context.Instance.FaultTime = context.Data.FaultTime;
                 })
                 .Publish(ctx => new ReportFailedEvent(ctx.Instance)).Finalize()
                 .ThenAsync(context => Console.Out.WriteLineAsync(context.Instance.ToString()))

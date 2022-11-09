@@ -42,10 +42,10 @@ public class TransferController : ControllerBase
         await moneyTransferDomainService.DepositeFunds(account.Id, request.Amount);
 
         await _messagePublisher.Publish(new ReportRequestReceivedEvent(
-            new ReportSagaState()
+            new ReportSagaStateMore()
             {
                 CustomerId = "customer-1234",
-                ReportId = "test",
+                ReportId = "report-test",
                 RequestTime = DateTime.Now
 
             })
@@ -64,7 +64,7 @@ public class TransferController : ControllerBase
             await _messagePublisher.Publish(new TransferFundsEvent
             {
                 TransferRecord = transferRecord,
-                DelayInMS = 3000
+                DelayInMS = 60000
             });
             return new TransferResult { Success = true, TransferDate = transferRecord.TransferTime };
         }

@@ -49,7 +49,7 @@ public class RunWebApp
                 builder.Services.AddTransient<IMessagePublisher, MessagePublisher>();
                 builder.Services.AddMassTransit(o =>
                 {
-                    o.AddSagaStateMachine<ReportStateMachine,ReportSagaState>().InMemoryRepository();
+                    o.AddSagaStateMachine<ReportStateMachine,ReportSagaStateMore>().InMemoryRepository();
                     o.SetKebabCaseEndpointNameFormatter();
                     o.AddConsumer<TransferFundsEventConsumer>();
                     o.AddConsumer<ReportRequestReceivedConsumer>();
