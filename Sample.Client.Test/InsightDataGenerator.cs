@@ -11,6 +11,23 @@ public class InsightDataGenerator
         _url = url;
     }
 
+    public async Task GenerateDurationData(TimeSpan duration, int milisec)
+    {
+        Console.WriteLine("***** generate short delay *****");
+
+        var i = new []{0};
+        var timer = new System.Threading.Timer(async (_) =>
+        {
+            await _client.GetAsync($"{_url}/SampleInsights/Delay/{milisec}");
+            i[0]++;
+            if(i[0]%5 == 0)
+                Console.WriteLine($"{DateTime.Now}: sent {i[0]}");
+        }, null, 0, 200);
+
+        await Task.Delay(duration);
+        await timer.DisposeAsync();
+    }
+    
     
     public async Task GenerateInsightData()
     {

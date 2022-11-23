@@ -203,6 +203,13 @@ public class SampleInsightsController : ControllerBase
     }
 
     [HttpGet]
+    [Route("Delay/{milisec}")]
+    public async Task Delay(int milisec)
+    {
+        await Task.Delay(TimeSpan.FromMilliseconds(milisec));
+    }
+    
+    [HttpGet]
     [Route("Error")]
     public async Task Error()
     {
