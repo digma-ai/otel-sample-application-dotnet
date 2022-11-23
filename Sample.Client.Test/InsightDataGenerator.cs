@@ -11,32 +11,18 @@ public class InsightDataGenerator
         _url = url;
     }
 
-    public class Counter
-    {
-        public DateTime Value { get; set; } = DateTime.Now;
-
-        public bool Changed()
-        {
-            var now = DateTime.Now;
-            return new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second) !=
-                    new DateTime(Value.Year, Value.Month, Value.Day, Value.Hour, Value.Minute, Value.Second);
-        }
-    }
-    
     public async Task GenerateDurationData(TimeSpan duration, int milisec)
     {
         Console.WriteLine("***** generate short delay *****");
-        
-        var timer = new System.Threading.Timer(async (e) =>
+
+        var i = new []{0};
+        var timer = new System.Threading.Timer(async (_) =>
         {
             await _client.GetAsync($"{_url}/SampleInsights/Delay/{milisec}");
-            var counter = (Counter) e!;
-            if (counter.Changed())
-            {
-                Console.WriteLine(DateTime.Now);
-                counter.Value = DateTime.Now;
-            }
-        }, new Counter(), 0, 200);
+            i[0]++;
+            if(i[0]%5 == 0)
+                Console.WriteLine($"{DateTime.Now}: sent {i[0]}");
+        }, null, 0, 200);
 
         await Task.Delay(duration);
         await timer.DisposeAsync();
@@ -47,21 +33,6 @@ public class InsightDataGenerator
     {
         Console.WriteLine("***** START GenerateInsightData *****");
 
-        
-        Console.WriteLine("***** generate short delay *****");
-        for (int i = 0; i < 2000; i++)
-        {
-            HttpResponseMessage response = await _client.GetAsync($"{_url}/SampleInsights/Delay/10");
-            await Task.Delay(100);
-            Console.WriteLine($"{i}/2000");
-        }           
-        Console.WriteLine("***** generate long delay *****");
-        for (int i = 0; i < 2000; i++)
-        {
-            HttpResponseMessage response = await _client.GetAsync($"{_url}/SampleInsights/Delay/100");
-            Console.WriteLine(response.StatusCode);
-        }     
-        
         Console.WriteLine("***** generate errors source *****");
         for (int i = 0; i < 10; i++)
         {
