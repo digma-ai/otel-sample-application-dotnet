@@ -1,5 +1,6 @@
 ﻿using ClientTester;
 
+
 var url = "http://localhost:7151";
 var value = Environment.GetEnvironmentVariable("MoneyTransferApiUrl");
 if (value != null)
@@ -15,7 +16,7 @@ var accountapi = new AccountsApiClient(url);
 var transfersapi = new TransfersApiClient(url);
 
 await new InsightDataGenerator(url).GenerateInsightData();
-//await new InsightDataGenerator(url).GenerateDurationData(TimeSpan.FromMinutes(5), 10);
+//await new InsightDataGenerator(url).GenerateDurationData(TimeSpan.FromMinutes(10), 10);
 
 var externalAccounts = await accountapi.Create(10,10, false);
 
