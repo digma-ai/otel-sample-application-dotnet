@@ -286,7 +286,7 @@ public class SampleInsightsController : ControllerBase
     [Route("HighUsage")]
     public async Task HighUsage()
     {
-        await Task.Delay(TimeSpan.FromMilliseconds(80));
+        await Task.Delay(TimeSpan.FromMilliseconds(5));
     }
 
     [HttpGet]
