@@ -13,18 +13,19 @@ This is a simple 'hello world' level application at the moment. The intent was c
 
 ### Sample.Client.Test utility
 
-A simple test utility to create traffic, exceptions, and interesting situations to review with [Digma](https://github.com/digma-ai/digma). This is meant to be an open utility where additiona use cases and scenarios could easily be defined.
+A simple test utility to create traffic, exceptions, and interesting situations to review with [Digma](https://github.com/digma-ai/digma). This is meant to be an open utility where additional use cases and scenarios could easily be defined.
 
 
 #### Running the Money Tranfer API
 
-```bash
+```sh
 cd Sample.MoneyTransfer.Api
 docker compose up 
 ```
 or
 
-```
+```sh
+cd Sample.MoneyTransfer.Api
 dotnet restore Sample.MoneyTransfer.API.csproj
 dotnet run
 ```
@@ -33,13 +34,14 @@ dotnet run
 ### Running the tester script
 
 
-```bash
+```sh
 cd Sample.Client.Test
-docker compose up 
+docker compose up
 ```
 or
 
-```
+```sh
+cd Sample.Client.Test
 dotnet restore ClientTester.csproj
 dotnet run
 ```
