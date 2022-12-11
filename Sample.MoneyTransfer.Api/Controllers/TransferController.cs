@@ -58,14 +58,17 @@ public class TransferController : ControllerBase
     public async Task<TransferResult> TransferFunds(TransferRequest request)
     {
         using (var activity = Activity.StartActivity("Process transfer", ActivityKind.Internal)){
-            var transferRecord = await moneyTransferDomainService.TransferFunds(request.SouceAccountId,
-                                                     request.TargetAccountId,
-                                                     request.Amount);
+        
             await _messagePublisher.Publish(new TransferFundsEvent
             {
-                TransferRecord = transferRecord,
+                TransferRecord = null,
                 DelayInMS = 60000
             });
+            
+            var transferRecord = await moneyTransferDomainService.TransferFunds(request.SouceAccountId,
+                request.TargetAccountId,
+                request.Amount);
+            
             return new TransferResult { Success = true, TransferDate = transferRecord.TransferTime };
         }
     }

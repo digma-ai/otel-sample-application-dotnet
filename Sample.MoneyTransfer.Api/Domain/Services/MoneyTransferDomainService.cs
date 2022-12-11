@@ -44,7 +44,6 @@ namespace Sample.MoneyTransfer.API.Domain.Services
 
         public async Task<TransferRecord> TransferFunds(long source, long target, int amount)
         {
-
             var sourceAccount = await RetrieveAccount(target);
 
             var targetAccount = await RetrieveAccount(target);
