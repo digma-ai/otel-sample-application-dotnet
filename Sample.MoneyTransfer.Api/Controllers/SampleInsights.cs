@@ -208,6 +208,25 @@ public class SampleInsightsController : ControllerBase
     {
         await Task.Delay(TimeSpan.FromMilliseconds(milisec));
     }
+
+    private static readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
+
+    [HttpGet]
+    [Route("lock/{milisec}")]
+    public async Task Lock(double milisec = 10)
+    {
+        var dist = new MathNet.Numerics.Distributions.Normal(milisec, milisec / 10);
+        var sample = dist.Sample();
+        await _semaphoreSlim.WaitAsync();
+        try
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(sample));
+        }
+        finally
+        {
+            _semaphoreSlim.Release();
+        }
+    }
     
     [HttpGet]
     [Route("Error")]

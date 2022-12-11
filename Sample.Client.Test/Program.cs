@@ -16,7 +16,12 @@ var accountapi = new AccountsApiClient(url);
 var transfersapi = new TransfersApiClient(url);
 
 await new InsightDataGenerator(url).GenerateInsightData();
-//await new InsightDataGenerator(url).GenerateDurationData(TimeSpan.FromMinutes(10), 10);
+
+// await new InsightDataGenerator(url).GenerateDurationData(TimeSpan.FromMinutes(10), 10);
+
+// await new InsightDataGenerator(url).GenerateGoodScalingData();
+// await new InsightDataGenerator(url).GenerateBadScalingData();
+// await new InsightDataGenerator(url).GenerateNoScalingData();
 
 var externalAccounts = await accountapi.Create(10,10, false);
 

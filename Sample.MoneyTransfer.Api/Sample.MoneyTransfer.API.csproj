@@ -11,6 +11,7 @@
     <PackageReference Include="LibGit2Sharp" Version="0.27.0-preview-0175" />
     <PackageReference Include="MassTransit" Version="8.0.5" />
     <PackageReference Include="MassTransit.RabbitMQ" Version="8.0.5" />
+    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.4" />
     <PackageReference Include="OpenTel.Digma.MassTransit.Integration" Version="0.6.9" />

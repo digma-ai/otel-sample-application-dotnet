@@ -1,3 +1,7 @@
+using System.Collections.Concurrent;
+using Humanizer;
+using MathNet.Numerics.Distributions;
+
 namespace ClientTester;
 
 public class InsightDataGenerator
@@ -28,6 +32,72 @@ public class InsightDataGenerator
         await timer.DisposeAsync();
     }
     
+    public async Task GenerateNoScalingData()
+    {
+        Console.WriteLine("***** generate no scaling *****");
+
+        var tasks = new ConcurrentBag<Task>();
+        
+        await Execute(() => tasks.Add(_client.GetAsync($"{_url}/SampleInsights/lock/100")), 5, TimeSpan.FromSeconds(20));
+
+        await Task.WhenAll(tasks);
+    }
+        
+    public async Task GenerateGoodScalingData()
+    {
+        Console.WriteLine("***** generate good scaling *****");
+
+        var tasks = new ConcurrentBag<Task>();
+        
+        for (var i = 1; i < 20; i++)
+        {
+            await Execute(() => tasks.Add(_client.GetAsync($"{_url}/SampleInsights/lock/10")), i, TimeSpan.FromSeconds(1));
+        }
+
+        await Task.WhenAll(tasks);
+    }
+    
+    public async Task GenerateBadScalingData()
+    {
+        Console.WriteLine("***** generate bad scaling *****");
+
+        var tasks = new ConcurrentBag<Task>();
+
+        for (var i = 1; i < 20; i++)
+        {
+            await Execute(() => tasks.Add(_client.GetAsync($"{_url}/SampleInsights/lock/100")), i, TimeSpan.FromSeconds(2));
+        }
+
+        await Task.WhenAll(tasks);
+    }
+
+    public async Task Execute(Action action, float timesPerSecond, TimeSpan duration)
+    {
+        Console.WriteLine($"Executing action {timesPerSecond} times per second, for {duration.Humanize()}");
+
+        var poisson = new Poisson(1000 / timesPerSecond);
+        var tokenSource = new CancellationTokenSource(duration);
+
+        async Task SchedulerLoop()
+        {
+            while (!tokenSource.Token.IsCancellationRequested)
+            {
+                action();
+                try
+                {
+                    var delay = TimeSpan.FromMilliseconds(poisson.Sample());
+                    Console.WriteLine($"{DateTime.Now:O} delay {delay.Humanize()}");
+                    await Task.Delay(delay, tokenSource.Token);
+                }
+                catch (TaskCanceledException)
+                {
+                    break;
+                }
+            }
+        }
+        
+        await SchedulerLoop();
+    }
     
     public async Task GenerateInsightData()
     {
