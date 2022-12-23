@@ -103,14 +103,28 @@ public class InsightDataGenerator
     {
         Console.WriteLine("***** START GenerateInsightData *****");
 
-        Console.WriteLine("***** generate errors source *****");
+        Console.WriteLine("***** generate ScaleFactor *****");
         for (int i = 0; i < 10; i++)
         {
-            HttpResponseMessage response = await _client.GetAsync($"{_url}/SampleInsights/ErrorSource");
-            Console.WriteLine(response.StatusCode);
+            await _client.GetAsync($"{_url}/SampleInsights/ScaleFactor?extraLatency=50");
         }
+
+        Func<Task> callWithLatency = async () =>
+        {
+            await _client.GetAsync($"{_url}/SampleInsights/ScaleFactor?extraLatency=1000");
+        };
+        var tasks = new List<Task>();
+
+        for (int i = 0; i < 20; i++)
+        {
+            tasks.Add(callWithLatency());
+        }
+        Console.WriteLine("wait all tasks to complete...");
+        await Task.WhenAll(tasks);
+        Console.WriteLine("tasks completed!");
+
         Console.WriteLine("***** generate errors insights *****");
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 20; i++)
         {
             HttpResponseMessage response = await _client.GetAsync($"{_url}/SampleInsights/Error");
             Console.WriteLine(response.StatusCode);
