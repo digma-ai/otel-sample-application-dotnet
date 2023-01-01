@@ -339,9 +339,9 @@ public class SampleInsightsController : ControllerBase
     [Route("ScaleFactor")]
     public void ScaleFactor([FromQuery] int extraLatency)
     {
+        using var activity = Activity.StartActivity("external call");
         lock (Random)
         {
-            using var activity = Activity.StartActivity("external call");
             Console.WriteLine(extraLatency);
             Thread.Sleep(extraLatency);
         }
