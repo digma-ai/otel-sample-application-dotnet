@@ -102,27 +102,7 @@ public class InsightDataGenerator
     public async Task GenerateInsightData()
     {
         Console.WriteLine("***** START GenerateInsightData *****");
-
-        Console.WriteLine("***** generate ScaleFactor *****");
-        for (int i = 0; i < 10; i++)
-        {
-            await _client.GetAsync($"{_url}/SampleInsights/ScaleFactor?extraLatency=50");
-        }
-
-        Func<Task> callWithLatency = async () =>
-        {
-            await _client.GetAsync($"{_url}/SampleInsights/ScaleFactor?extraLatency=1000");
-        };
-        var tasks = new List<Task>();
-
-        for (int i = 0; i < 20; i++)
-        {
-            tasks.Add(callWithLatency());
-        }
-        Console.WriteLine("wait all tasks to complete...");
-        await Task.WhenAll(tasks);
-        Console.WriteLine("tasks completed!");
-
+        
         Console.WriteLine("***** generate errors insights *****");
         for (int i = 0; i < 20; i++)
         {
