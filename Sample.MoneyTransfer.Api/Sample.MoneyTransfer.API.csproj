@@ -15,7 +15,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.4" />
     <PackageReference Include="OpenTel.Digma.MassTransit.Integration" Version="0.6.9" />
-    <PackageReference Include="OpenTel.Instrumentation.Digma" Version="0.6.10" />
+    <PackageReference Include="OpenTel.Instrumentation.Digma" Version="0.6.12" />
     <PackageReference Include="OpenTelemetry" Version="1.3.0" />
     <PackageReference Include="OpenTelemetry.Contrib.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta2" />
     <PackageReference Include="OpenTelemetry.Exporter.Jaeger" Version="1.3.0" />

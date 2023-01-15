@@ -6,7 +6,6 @@ using Sample.MoneyTransfer.API.Domain.Models;
 
 namespace Sample.MoneyTransfer.API.Domain.Services
 {
-    [ActivitiesAttributes("activity_type:Money Operations", "layer:Domain")]
     public class MoneyTransferDomainService : IMoneyTransferDomainService
     {
         private static readonly ActivitySource Activity = new(nameof(MoneyTransferDomainService));
@@ -14,7 +13,6 @@ namespace Sample.MoneyTransfer.API.Domain.Services
         private readonly Gringotts  moneyVault;
         private readonly ICreditProviderService creditProviderService;
 
-        [TraceActivity(name:"Validating account funds")]
         private async Task<bool> ValidateAccountFunds(Account account, int amount)
         {
 
@@ -36,7 +34,6 @@ namespace Sample.MoneyTransfer.API.Domain.Services
                 
         }
         
-        [TraceActivity(recordExceptions:false)]
         private async Task<Account> RetrieveAccount(long id)
         {
             return await moneyVault.Accounts.FindAsync(id);

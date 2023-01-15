@@ -8,6 +8,7 @@ using Sample.MoneyTransfer.API.Data;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.Digma.Diagnostic;
+using OpenTelemetry.Instrumentation.Digma.Helpers;
 using Sample.MoneyTransfer.API.Consumer;
 using Sample.MoneyTransfer.API.Domain.Services;
 
@@ -113,13 +114,15 @@ public class RunWebApp
             builder.Services
                 .AddDbContext<Gringotts >(options =>
                     options.UseInMemoryDatabase(databaseName: "Vault"));
+            
+            builder.Services.AddTransient<CreditProviderService>();
+            builder.Services.AddTransient<MoneyTransferDomainService>();
+            
+            builder.Services.AddScoped(x => TraceDecorator<ICreditProviderService>.Create(x.GetRequiredService<CreditProviderService>()));
+            builder.Services.AddScoped(x => TraceDecorator<IMoneyTransferDomainService>.Create(x.GetRequiredService<MoneyTransferDomainService>()));
 
-        builder.Services.AddScoped<IMoneyTransferDomainService, MoneyTransferDomainService>();
 
-        builder.Services.AddScoped<ICreditProviderService, CreditProviderService>();
-
-
-        var app = builder.Build();
+            var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             //if (app.Environment.IsDevelopment())
