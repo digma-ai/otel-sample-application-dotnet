@@ -96,15 +96,9 @@ public class InsightDataGenerator
     public async Task GenerateInsightData()
     {
         Console.WriteLine("***** START GenerateInsightData *****");
-
-        Console.WriteLine("***** generate errors source *****");
-        for (int i = 0; i < 10; i++)
-        {
-            HttpResponseMessage response = await _client.GetAsync($"{_url}/SampleInsights/ErrorSource");
-            Console.WriteLine(response.StatusCode);
-        }
+        
         Console.WriteLine("***** generate errors insights *****");
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 20; i++)
         {
             HttpResponseMessage response = await _client.GetAsync($"{_url}/SampleInsights/Error");
             Console.WriteLine(response.StatusCode);

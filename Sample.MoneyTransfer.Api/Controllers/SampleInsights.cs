@@ -346,4 +346,16 @@ public class SampleInsightsController : ControllerBase
         action();
         await Task.CompletedTask;
     }
+
+    [HttpGet]
+    [Route("ScaleFactor")]
+    public void ScaleFactor([FromQuery] int extraLatency)
+    {
+        using var activity = Activity.StartActivity("external call");
+        lock (Random)
+        {
+            Console.WriteLine(extraLatency);
+            Thread.Sleep(extraLatency);
+        }
+    }
 }
