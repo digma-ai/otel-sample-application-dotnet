@@ -216,6 +216,10 @@ public class SampleInsightsController : ControllerBase
     [Route("lock/{milisec}")]
     public async Task Lock(double milisec = 10)
     {
+        using (Activity.StartActivity("Connecting"))
+        {
+            await DelayAsync(TimeSpan.FromSeconds(2));
+        }
         var dist = new MathNet.Numerics.Distributions.Normal(milisec, milisec / 10);
         await WaitForLock(dist);
     }

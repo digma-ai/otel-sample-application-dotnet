@@ -97,6 +97,8 @@ public class InsightDataGenerator
     {
         Console.WriteLine("***** START GenerateInsightData *****");
         
+        await GenerateBadScalingData();
+        
         Console.WriteLine("***** generate errors insights *****");
         for (int i = 0; i < 20; i++)
         {
