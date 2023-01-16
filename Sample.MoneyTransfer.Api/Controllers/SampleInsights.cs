@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using MathNet.Numerics.Distributions;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Mvc;
 using OpenTelemetry.Trace;
@@ -206,7 +207,7 @@ public class SampleInsightsController : ControllerBase
     [Route("Delay/{milisec}")]
     public async Task Delay(int milisec)
     {
-        await Task.Delay(TimeSpan.FromMilliseconds(milisec));
+        await DelayAsync(TimeSpan.FromMilliseconds(milisec));
     }
 
     private static readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
@@ -215,12 +216,21 @@ public class SampleInsightsController : ControllerBase
     [Route("lock/{milisec}")]
     public async Task Lock(double milisec = 10)
     {
+        using (Activity.StartActivity("Connecting"))
+        {
+            await DelayAsync(TimeSpan.FromSeconds(2));
+        }
         var dist = new MathNet.Numerics.Distributions.Normal(milisec, milisec / 10);
-        var sample = dist.Sample();
+        await WaitForLock(dist);
+    }
+
+    private static async Task WaitForLock(Normal dist)
+    {
+        using var activity = Activity.StartActivity();
         await _semaphoreSlim.WaitAsync();
         try
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(sample));
+            await DelayAsync(TimeSpan.FromMilliseconds(dist.Sample()));
         }
         finally
         {
@@ -228,6 +238,12 @@ public class SampleInsightsController : ControllerBase
         }
     }
     
+    private static async Task DelayAsync(TimeSpan timeSpan)
+    {
+        using var activity = Activity.StartActivity();
+        await Task.Delay(timeSpan);
+    }
+
     [HttpGet]
     [Route("Error")]
     public async Task Error()

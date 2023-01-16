@@ -15,21 +15,15 @@ public class InsightDataGenerator
         _url = url;
     }
 
-    public async Task GenerateDurationData(TimeSpan duration, int milisec)
+    public async Task GenerateDurationData(TimeSpan duration, int timesPerSecond, int milisec)
     {
         Console.WriteLine("***** generate short delay *****");
 
-        var i = new []{0};
-        var timer = new System.Threading.Timer(async (_) =>
-        {
-            await _client.GetAsync($"{_url}/SampleInsights/Delay/{milisec}");
-            i[0]++;
-            if(i[0]%5 == 0)
-                Console.WriteLine($"{DateTime.Now}: sent {i[0]}");
-        }, null, 0, 200);
+        var tasks = new ConcurrentBag<Task>();
+        
+        await Execute(() => tasks.Add(_client.GetAsync($"{_url}/SampleInsights/Delay/{milisec}")), timesPerSecond, duration);
 
-        await Task.Delay(duration);
-        await timer.DisposeAsync();
+        await Task.WhenAll(tasks);
     }
     
     public async Task GenerateNoScalingData()
@@ -102,6 +96,8 @@ public class InsightDataGenerator
     public async Task GenerateInsightData()
     {
         Console.WriteLine("***** START GenerateInsightData *****");
+        
+        await GenerateBadScalingData();
         
         Console.WriteLine("***** generate errors insights *****");
         for (int i = 0; i < 20; i++)
