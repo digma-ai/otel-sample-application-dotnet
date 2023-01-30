@@ -202,7 +202,7 @@ public class SampleInsightsController : ControllerBase
                 break;
         }
     }
-
+    
     [HttpGet]
     [Route("Delay/{milisec}")]
     public async Task Delay(int milisec)
@@ -242,6 +242,37 @@ public class SampleInsightsController : ControllerBase
     {
         using var activity = Activity.StartActivity();
         await Task.Delay(timeSpan);
+    }
+    
+    [HttpGet]
+    [Route(nameof(NPlusOneWithoutInternalSpan))]
+    public void NPlusOneWithoutInternalSpan()
+    {
+        for (int i = 0; i < 100; i++)
+        {
+            DbQuery();
+        }
+    }
+    
+    [HttpGet]
+    [Route(nameof(NPlusOneWithInternalSpan))]
+    public void NPlusOneWithInternalSpan()
+    {
+        Console.WriteLine("doing stuff before");
+        
+        using (Activity.StartActivity("SomeInternalSpan"))
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                DbQuery();
+            }
+        }
+    }
+
+    private static void DbQuery()
+    {
+        using var activity = Activity.StartActivity(ActivityKind.Client);
+        activity.SetTag("db.statement", "select * from users");
     }
 
     [HttpGet]
