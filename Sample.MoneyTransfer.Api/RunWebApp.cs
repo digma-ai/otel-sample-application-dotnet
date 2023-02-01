@@ -47,6 +47,7 @@ public class RunWebApp
             {
                 builder.Services.AddMassTransitHostedService();
                 builder.Services.AddTransient<IMessagePublisher, MessagePublisher>();
+
                 builder.Services.AddMassTransit(o =>
                 {
                     o.AddSagaStateMachine<ReportStateMachine,ReportSagaStateMore>().InMemoryRepository();
@@ -54,6 +55,7 @@ public class RunWebApp
                     o.AddConsumer<TransferFundsEventConsumer>();
                     o.AddConsumer<ReportRequestReceivedConsumer>();
 
+                    
                     
                     o.UsingRabbitMq((context, configurator) =>
                     {  
@@ -66,15 +68,23 @@ public class RunWebApp
                             c.Username(userName);
                             c.Password(password);
                         });
-                        
-                        configurator.ReceiveEndpoint(KebabCaseEndpointNameFormatter.Instance.Consumer<TransferFundsEventConsumer>(), c => {
-                             c.ConfigureConsumer<TransferFundsEventConsumer>(context);
+                        configurator.ReceiveEndpoint("Blueprints", e =>
+                        {
+                            // e.UseMessageRetry(r =>
+                            // {
+                            //     r.Interval(5, TimeSpan.FromSeconds(5));
+                            // });
+
+                            e.ConfigureConsumers(context);
                         });
-                        
-                        configurator.ReceiveEndpoint(KebabCaseEndpointNameFormatter.Instance.Consumer<ReportRequestReceivedConsumer>(), c => {
-                            c.ConfigureConsumer<ReportRequestReceivedConsumer>(context);
-                        });
-                        configurator.ConfigureEndpoints(context);
+                        // configurator.ReceiveEndpoint(KebabCaseEndpointNameFormatter.Instance.Consumer<TransferFundsEventConsumer>(), c => {
+                        //      c.ConfigureConsumer<TransferFundsEventConsumer>(context);
+                        // });
+                        //
+                        // configurator.ReceiveEndpoint(KebabCaseEndpointNameFormatter.Instance.Consumer<ReportRequestReceivedConsumer>(), c => {
+                        //     c.ConfigureConsumer<ReportRequestReceivedConsumer>(context);
+                        // });
+                        // configurator.ConfigureEndpoints(context);
                     });
                 });
             }

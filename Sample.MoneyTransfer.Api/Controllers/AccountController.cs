@@ -47,7 +47,7 @@ namespace Sample.MoneyTransfer.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<AccountDto>> GetAccount(long id)
+        public async Task<ActionResult<AccountDto>> GetAccount(long id, [FromQuery(Name = "all")] bool all)
         {
             var account = await context.Accounts.FindAsync(id);
 
