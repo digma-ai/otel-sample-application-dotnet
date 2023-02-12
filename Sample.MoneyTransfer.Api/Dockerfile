@@ -3,7 +3,7 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["./", "./"]
+COPY ["Sample.MoneyTransfer.Api/", "./"]
 
 RUN dotnet restore "Sample.MoneyTransfer.API.csproj"
 
