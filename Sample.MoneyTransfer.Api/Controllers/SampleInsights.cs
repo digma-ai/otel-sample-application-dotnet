@@ -4,6 +4,7 @@ using MathNet.Numerics.Distributions;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Mvc;
 using OpenTelemetry.Trace;
+using Sample.MoneyTransfer.API.Utils;
 
 namespace Sample.MoneyTransfer.API.Controllers;
 
@@ -245,34 +246,38 @@ public class SampleInsightsController : ControllerBase
     }
     
     [HttpGet]
-    [Route(nameof(NPlusOneWithoutInternalSpan))]
-    public void NPlusOneWithoutInternalSpan()
+    [Route(nameof(NPlusOne))]
+    public void NPlusOne()
     {
-        for (int i = 0; i < 100; i++)
+        using (Activity.StartActivity("NewInternalSpan"))
         {
-            DbQuery();
+            Enumerable.Range(0, 100).Foreach(_ => DbQueryUsers());
         }
+        
+        Enumerable.Range(0, 90).Foreach(_ => DbQueryAccounts());
+        Enumerable.Range(0, 80).Foreach(_ => DbQueryRoles());
+        Enumerable.Range(0, 70).Foreach(_ => DbQueryGroups());
     }
     
-    [HttpGet]
-    [Route(nameof(NPlusOneWithInternalSpan))]
-    public void NPlusOneWithInternalSpan()
-    {
-        Console.WriteLine("doing stuff before");
-        
-        using (Activity.StartActivity("SomeInternalSpan"))
-        {
-            for (int i = 0; i < 100; i++)
-            {
-                DbQuery();
-            }
-        }
-    }
-
-    private static void DbQuery()
+    private static void DbQueryUsers()
     {
         using var activity = Activity.StartActivity(ActivityKind.Client);
-        activity.SetTag("db.statement", "select * from users");
+        activity?.SetTag("db.statement", "select * from users");
+    } 
+    private static void DbQueryAccounts()
+    {
+        using var activity = Activity.StartActivity(ActivityKind.Client);
+        activity?.SetTag("db.statement", "select * from accounts");
+    }
+    private static void DbQueryRoles()
+    {
+        using var activity = Activity.StartActivity(ActivityKind.Client);
+        activity?.SetTag("db.statement", "select * from roles");
+    }
+    private static void DbQueryGroups()
+    {
+        using var activity = Activity.StartActivity(ActivityKind.Client);
+        activity?.SetTag("db.statement", "select * from groups");
     }
 
     [HttpGet]
