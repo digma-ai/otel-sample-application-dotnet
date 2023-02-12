@@ -96,7 +96,7 @@ public class InsightDataGenerator
     public async Task GenerateInsightData()
     {
         Console.WriteLine("***** START GenerateInsightData *****");
-        
+
         await GenerateBadScalingData();
         
         Console.WriteLine("***** generate errors insights *****");
@@ -165,7 +165,7 @@ public class InsightDataGenerator
         }
         
         await _client.GetAsync($"{_url}/SampleInsights/Spans");
-        
+
         Console.WriteLine("***** END GenerateInsightData *****");
 
     }

@@ -393,4 +393,44 @@ public class SampleInsightsController : ControllerBase
             Thread.Sleep(extraLatency);
         }
     }
+    [HttpGet]
+    [Route("SpanGenerator")]
+    public async Task SpanGenerator([FromQuery] int count)
+    {
+        var maxConcurrency = 10;
+        int i = 3000;
+        System.Diagnostics.Activity.Current = null; 
+        while (count > 0)
+        {
+            using var ac = Activity.StartActivity($"dynamic_span_{++i}");
+            await Task.Delay(50);
+            count--;
+        }
+
+        // while (count>0)
+        // {
+        //     List<Task> tasks = new List<Task>();
+        //     var concurrency = Math.Min(maxConcurrency,count);
+        //     for (int j=0; j < concurrency; j++)
+        //     {
+        //         var num = ++i;
+        //         Task t = Task.Run(async () =>
+        //         {
+        //             System.Diagnostics.Activity.Current = null; 
+        //             using var ac = Activity.StartActivity($"dynamic_span_{num}");
+        //             await Task.Delay(50);
+        //         });
+        //         tasks.Add(t);
+        //         count--;
+        //     }
+        //     await Task.WhenAll(tasks);
+        //     Console.WriteLine("remaining: "+count);
+        //    
+        // }
+        // for (var i = 0; i < count; i++)
+        // {
+        //     using var activity = Activity.StartActivity($"dynamic_span_{i+1}");
+        //     await Task.Delay(50);
+        // }
+    }
 }
