@@ -3,16 +3,19 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
+
+COPY "Sample.MoneyTransfer.Api/Sample.MoneyTransfer.API.csproj" "Sample.MoneyTransfer.Api/Sample.MoneyTransfer.API.csproj"
+
+RUN dotnet restore "Sample.MoneyTransfer.Api/Sample.MoneyTransfer.API.csproj"
+
 COPY ["Sample.MoneyTransfer.Api/", "./"]
 
-RUN dotnet restore "Sample.MoneyTransfer.API.csproj"
 
-RUN dotnet build "Sample.MoneyTransfer.API.csproj" -c Release -o /app/build
+WORKDIR /Sample.MoneyTransfer.Api/
 
-FROM build AS publish
-RUN dotnet publish "Sample.MoneyTransfer.API.csproj" -c Release -o /app/publish
+RUN dotnet publish --no-restore -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "Sample.MoneyTransfer.API.dll"]
