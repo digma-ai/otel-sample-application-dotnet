@@ -35,7 +35,7 @@ public class RunWebApp
             var serviceVersion = typeof(RunWebApp).Assembly.GetName().Version!.ToString();
 
             Console.WriteLine($"DEPLOYMENT_COMMIT_ID={Environment.GetEnvironmentVariable("DEPLOYMENT_COMMIT_ID")}");
-            Console.WriteLine($"DEPLOYMENT_ENVIORNMENT={Environment.GetEnvironmentVariable("DEPLOYMENT_ENV")}");
+            Console.WriteLine($"DEPLOYMENT_ENV={Environment.GetEnvironmentVariable("DEPLOYMENT_ENV")}");
 
             var rabbitSection = builder.Configuration.GetSection("RabbitMq");
             if (rabbitSection.Exists())
