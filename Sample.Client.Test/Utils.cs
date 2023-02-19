@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace ClientTester
 {
-	public class Utils
+	public static class Utils
 	{
         public static  async Task<T> ParseResponse<T>(HttpResponseMessage httpResponse)
         {
@@ -21,6 +21,11 @@ namespace ClientTester
 
             
 
+        }
+
+        public static DateTime RoundSeconds(this DateTime c)
+        {
+            return new DateTime(c.Year, c.Month, c.Day, c.Hour, c.Minute, c.Second, 0, c.Kind);
         }
     }
 }

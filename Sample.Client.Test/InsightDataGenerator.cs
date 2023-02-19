@@ -15,13 +15,14 @@ public class InsightDataGenerator
         _url = url;
     }
 
-    public async Task GenerateDurationData(TimeSpan duration, int timesPerSecond, int milisec)
+    public async Task GenerateUnverifiedChange()
     {
-        Console.WriteLine("***** generate short delay *****");
+        Console.WriteLine("***** generate unverified change *****");
 
         var tasks = new ConcurrentBag<Task>();
         
-        await Execute(() => tasks.Add(_client.GetAsync($"{_url}/SampleInsights/Delay/{milisec}")), timesPerSecond, duration);
+        await Execute(() => tasks.Add(_client.GetAsync($"{_url}/SampleInsights/UnverifiedChange/10")), 16, 8.Seconds());
+        await Execute(() => tasks.Add(_client.GetAsync($"{_url}/SampleInsights/UnverifiedChange/20")), 16, 4.Seconds());
 
         await Task.WhenAll(tasks);
     }
@@ -69,27 +70,44 @@ public class InsightDataGenerator
     {
         Console.WriteLine($"Executing action {timesPerSecond} times per second, for {duration.Humanize()}");
 
-        var poisson = new Poisson(1000 / timesPerSecond);
-        var tokenSource = new CancellationTokenSource(duration);
+        var safeMargin = 100;
+        double mean = (1000-safeMargin*2) / (timesPerSecond);
+        var poisson = new Poisson(mean);
 
         async Task SchedulerLoop()
         {
+            await Task.Delay(1000 - DateTime.Now.Millisecond);
+            Console.WriteLine($"{new DateTime(DateTime.Now.Ticks):O} started");
+            var lastSecond = DateTime.Now.RoundSeconds();
+            var counter = 0;
+            var tokenSource = new CancellationTokenSource(duration);
             while (!tokenSource.Token.IsCancellationRequested)
             {
                 action();
+                counter++;
                 try
                 {
-                    var delay = TimeSpan.FromMilliseconds(poisson.Sample());
-                    Console.WriteLine($"{DateTime.Now:O} delay {delay.Humanize()}");
+                    var delay = Math.Min(mean, poisson.Sample()).Milliseconds();
                     await Task.Delay(delay, tokenSource.Token);
                 }
                 catch (TaskCanceledException)
                 {
                     break;
                 }
+                finally
+                {
+                    var thisSecond = DateTime.Now.RoundSeconds();
+                    if (lastSecond != thisSecond)
+                    {
+                        Console.WriteLine($"{lastSecond:s} executed {counter} times");
+                        lastSecond = thisSecond;
+                        counter = 0;
+                    }
+                }
             }
+            Console.WriteLine($"{new DateTime(DateTime.Now.Ticks):O} ended");
         }
-        
+
         await SchedulerLoop();
     }
     
@@ -97,6 +115,8 @@ public class InsightDataGenerator
     {
         Console.WriteLine("***** START GenerateInsightData *****");
 
+        await GenerateUnverifiedChange();
+        
         await GenerateBadScalingData();
         
         Console.WriteLine("***** generate errors insights *****");

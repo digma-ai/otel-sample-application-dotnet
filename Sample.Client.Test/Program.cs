@@ -17,8 +17,6 @@ var transfersapi = new TransfersApiClient(url);
 
 await new InsightDataGenerator(url).GenerateInsightData();
 
-// await new InsightDataGenerator(url).GenerateDurationData(TimeSpan.FromSeconds(10), 20, 100);
-
 // await new InsightDataGenerator(url).GenerateGoodScalingData();
 // await new InsightDataGenerator(url).GenerateNoScalingData();
 
