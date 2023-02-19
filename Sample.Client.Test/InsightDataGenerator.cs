@@ -119,6 +119,9 @@ public class InsightDataGenerator
         
         await GenerateBadScalingData();
         
+        Console.WriteLine("***** generate N-Plus-One insight *****");
+        await _client.GetAsync($"{_url}/SampleInsights/NPlusOne");
+
         Console.WriteLine("***** generate errors insights *****");
         for (int i = 0; i < 20; i++)
         {
