@@ -309,6 +309,24 @@ public class SampleInsightsController : ControllerBase
     }
 
     [HttpGet]
+    [Route("CodeFunctionSpan")]
+    public async Task CodeFunctionSpan()
+    {
+        using var a1 = Activity.StartActivity("span1");
+        a1?.AddTag("code.namespace", "Sample.MoneyTransfer.API.Controllers.SampleInsightsController");
+        a1?.AddTag("code.function", "CodeFunctionSpan");
+
+        await Task.Delay(300);
+
+        using var a2 = Activity.StartActivity("span2");
+        a2?.AddTag("code.namespace", "Sample.MoneyTransfer.API.Controllers.SampleInsightsController");
+        a2?.AddTag("code.function", "CodeFunctionSpan");
+
+        await Task.Delay(300);
+    }
+
+
+    [HttpGet]
     [Route("SpanBottleneck")]
     public async Task SpanBottleneck()
     {
