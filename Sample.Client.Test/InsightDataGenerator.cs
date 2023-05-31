@@ -203,14 +203,14 @@ public class InsightDataGenerator
         }
 
         Console.WriteLine("***** generate endpoints with method overloading A3 *****");
-        for (int i = 0; i < 1; i++)
+        for (int i = 0; i < 3; i++)
         {
             HttpResponseMessage response = await _client.GetAsync(
                 $"{_url}/SampleInsights/OverloadingA3?name=someName{i}&description=someDesc{i}&longId={i + 1000}");
             Console.WriteLine(response.StatusCode);
         }
 
-        // Console.WriteLine("***** generate high usage insight *****");
+        Console.WriteLine("***** generate high usage insight *****");
         for (int i = 0; i < 400; i++)
         {
             HttpResponseMessage response =

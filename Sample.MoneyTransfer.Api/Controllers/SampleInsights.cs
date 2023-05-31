@@ -394,11 +394,11 @@ public class SampleInsightsController : ControllerBase
     
      
     [HttpGet]
-    [Route(nameof(BottlwNeckTest))]
-    public void BottlwNeckTest()
+    [Route(nameof(BottleNeckTest))]
+    public void BottleNeckTest()
     {
-        DbQueryUsers1();
-        DbQueryAccounts1();
+        DbQueryUsersBottleNeck();
+        DbQueryAccountsBottleNeck();
     }
     
     [HttpGet]
@@ -416,7 +416,6 @@ public class SampleInsightsController : ControllerBase
     private static void DbQueryUsers()
     {
         using var activity = Activity.StartActivity(ActivityKind.Client);
-        Task.Delay(100);
         activity?.SetTag("db.statement", "select * from users");
     } 
     
@@ -426,17 +425,18 @@ public class SampleInsightsController : ControllerBase
         activity?.SetTag("db.statement", "select * from accounts where a = 1 b =2 c = 3");
     }
     
-    private static void DbQueryUsers1()
+    private static void DbQueryUsersBottleNeck()
     {
         using var activity = Activity.StartActivity();
         activity?.SetTag("db.statement", "select * from users");
         Task.Delay(100);
     } 
     
-    private static void DbQueryAccounts1()
+    private static void DbQueryAccountsBottleNeck()
     {
         using var activity = Activity.StartActivity();
         activity?.SetTag("db.statement", "select * from accounts where a = 1 b =2 c = 3");
+        Task.Delay(100);
     }
 
     private static void DbQueryRoles()
