@@ -12,6 +12,11 @@ class SampleInsightsService
 {
     private static readonly ActivitySource Activity = new(nameof(SampleInsightsService));
 
+    public SampleInsightsService()
+    {
+        
+    }
+    
     private void Connect(string connectionName)
     {
         throw new ConnectionAbortedException($"aborting connection named {connectionName}");
@@ -212,6 +217,33 @@ public class SampleInsightsController : ControllerBase
     }
  
     [HttpGet]
+    [Route("PureDelay/{milisec}")]
+    public async Task PureDelay(int milisec)
+    {
+        await Task.Delay(milisec);
+    }
+    
+     
+    [HttpGet]
+    [Route("Nesting/{milisec}")]
+    public async Task Nesting(int milisec)
+    {
+        await Child1(milisec);
+    }
+
+    private async Task Child1(int milisec)
+    {
+        using var activity = Activity.StartActivity();
+        await Child2(milisec);
+    }
+
+    private async Task Child2(int milisec)
+    {
+        using var activity = Activity.StartActivity();
+        await Task.Delay(milisec * 2);
+    }
+    
+    [HttpGet]
     [Route("Delay/{milisec}")]
     public async Task Delay(int milisec)
     {
@@ -227,6 +259,114 @@ public class SampleInsightsController : ControllerBase
         using (Activity.StartActivity("Connecting"))
         {
             await DelayAsync(TimeSpan.FromSeconds(2));
+        }
+        var dist = new MathNet.Numerics.Distributions.Normal(milisec, milisec / 10);
+        await WaitForLock(dist);
+    }
+    
+    [HttpGet]
+    [Route("lock1/{milisec}")]
+    public async Task Lock1(double milisec = 10)
+    {
+        using (Activity.StartActivity("Connecting1"))
+        {
+            await DelayAsync(TimeSpan.FromSeconds(2));
+        }
+        var dist = new MathNet.Numerics.Distributions.Normal(milisec, milisec / 10);
+        await WaitForLock(dist);
+    }
+
+    private async Task Internal()
+    {
+        using var activity1 = Activity.StartActivity("Internal", ActivityKind.Internal);
+        await Task.Delay(TimeSpan.FromMilliseconds(500));
+    }
+    
+    private async Task Service1()
+    {
+        using var activity1 = Activity.StartActivity("Service1", ActivityKind.Server);
+        await Task.Delay(TimeSpan.FromMilliseconds(100));
+        await Internal();
+    }
+    
+    
+    private async Task Service2()
+    {
+        using var activity2 = Activity.StartActivity("Service2", ActivityKind.Client);
+        await Service1();
+    }
+    
+    private async Task Service3()
+    {
+        using var activity2 = Activity.StartActivity("Service3", ActivityKind.Client);
+        await Service1();
+    }
+
+    
+    [HttpGet]
+    [Route("ServiceEndpoint")]
+    public async Task ServiceEndpoint()
+    {
+        await Service2();
+        await Service3();
+    }
+    
+
+    [HttpGet]
+    [Route("lock2/{milisec}")]
+    public async Task Lock2(double milisec = 10)
+    {
+        using (Activity.StartActivity("Connecting2"))
+        {
+            await DelayAsync(TimeSpan.FromSeconds(2));
+        }
+        var dist = new MathNet.Numerics.Distributions.Normal(milisec, milisec / 10);
+        await WaitForLock(dist);
+    }
+    
+    [HttpGet]
+    [Route("lock3/{milisec}")]
+    public async Task Lock3(double milisec = 10)
+    {
+        using (Activity.StartActivity("Connecting3"))
+        {
+            await DelayAsync(TimeSpan.FromSeconds(2));
+        }
+        var dist = new MathNet.Numerics.Distributions.Normal(milisec, milisec / 10);
+        await WaitForLock(dist);
+    }
+    
+    [HttpGet]
+    [Route("lock4/{milisec}")]
+    public async Task Lock4(double milisec = 10)
+    {
+        using (Activity.StartActivity("Connecting4"))
+        {
+            await DelayAsync(TimeSpan.FromSeconds(1));
+        }
+        var dist = new MathNet.Numerics.Distributions.Normal(milisec, milisec / 10);
+        await WaitForLock(dist);
+    }
+    
+    [HttpGet]
+    [Route("lock5/{milisec}")]
+    public async Task Lock5(double milisec = 10)
+    {
+        using (Activity.StartActivity("Connecting5"))
+        {
+            await DelayAsync(TimeSpan.FromSeconds(1));
+        }
+        var dist = new MathNet.Numerics.Distributions.Normal(milisec, milisec / 10);
+        await WaitForLock(dist);
+    }
+    
+    [HttpGet]
+    [Route("lock6/{milisec}")]
+    public async Task Lock6(double milisec = 10)
+    {
+        using (Activity.StartActivity("Connecting6"))
+        {
+            await DelayAsync(TimeSpan.FromSeconds(1));
         }
         var dist = new MathNet.Numerics.Distributions.Normal(milisec, milisec / 10);
         await WaitForLock(dist);
@@ -252,16 +392,23 @@ public class SampleInsightsController : ControllerBase
         await Task.Delay(timeSpan);
     }
     
+     
+    [HttpGet]
+    [Route(nameof(BottleNeckTest))]
+    public void BottleNeckTest()
+    {
+        DbQueryUsersBottleNeck();
+        DbQueryAccountsBottleNeck();
+    }
+    
     [HttpGet]
     [Route(nameof(NPlusOne))]
     public void NPlusOne()
     {
-        using (Activity.StartActivity("NewInternalSpan"))
-        {
-            Enumerable.Range(0, 100).Foreach(_ => DbQueryUsers());
-        }
-        
-        Enumerable.Range(0, 90).Foreach(_ => DbQueryAccounts());
+        using var activity = Activity.StartActivity("NewInternalSpan");
+
+        Enumerable.Range(0, 10).Foreach(_ => DbQueryUsers());
+        Enumerable.Range(0, 10).Foreach(_ => DbQueryAccounts());
         Enumerable.Range(0, 80).Foreach(_ => DbQueryRoles());
         Enumerable.Range(0, 70).Foreach(_ => DbQueryGroups());
     }
@@ -271,16 +418,33 @@ public class SampleInsightsController : ControllerBase
         using var activity = Activity.StartActivity(ActivityKind.Client);
         activity?.SetTag("db.statement", "select * from users");
     } 
+    
     private static void DbQueryAccounts()
     {
         using var activity = Activity.StartActivity(ActivityKind.Client);
-        activity?.SetTag("db.statement", "select * from accounts");
+        activity?.SetTag("db.statement", "select * from accounts where a = 1 b =2 c = 3");
     }
+    
+    private static void DbQueryUsersBottleNeck()
+    {
+        using var activity = Activity.StartActivity();
+        activity?.SetTag("db.statement", "select * from users");
+        Task.Delay(100);
+    } 
+    
+    private static void DbQueryAccountsBottleNeck()
+    {
+        using var activity = Activity.StartActivity();
+        activity?.SetTag("db.statement", "select * from accounts where a = 1 b =2 c = 3");
+        Task.Delay(100);
+    }
+
     private static void DbQueryRoles()
     {
         using var activity = Activity.StartActivity(ActivityKind.Client);
         activity?.SetTag("db.statement", "select * from roles");
     }
+    
     private static void DbQueryGroups()
     {
         using var activity = Activity.StartActivity(ActivityKind.Client);
@@ -300,6 +464,15 @@ public class SampleInsightsController : ControllerBase
 
         throw new ValidationException("random validation error");
     }
+    
+    [HttpGet]
+    [Route("Error2")]
+    public async Task Error2()
+    {
+        await Task.Delay(TimeSpan.FromMilliseconds(1));
+
+        throw new ValidationException("random validation error");
+    }
 
     [HttpGet]
     [Route("SlowEndpoint")]
@@ -312,11 +485,22 @@ public class SampleInsightsController : ControllerBase
     [Route("SpanBottleneck")]
     public async Task SpanBottleneck()
     {
-        using var activity1 = Activity.StartActivity("SpanBottleneck 1");
-        await Task.Delay(TimeSpan.FromMilliseconds(200));
+        await (new DummyFile()).SpanBottleNeck1();
+        await (new DummyFile()).SpanBottleNeck2();
+    }
+    
+    [HttpGet]
+    [Route("SpanBottleneck1")]
+    public async Task SpanBottleneck1()
+    {
+        await InternalFromApi();
+    }
 
-        using var activity2 = Activity.StartActivity("SpanBottleneck 2");
-        await Task.Delay(TimeSpan.FromMilliseconds(100));
+    private async Task InternalFromApi()
+    {
+        using var activity2 = Activity.StartActivity("InternalFromApi", ActivityKind.Internal);
+        await (new DummyFile()).SpanBottleNeck1();
+        await (new DummyFile()).SpanBottleNeck2();
     }
 
     [HttpGet]
