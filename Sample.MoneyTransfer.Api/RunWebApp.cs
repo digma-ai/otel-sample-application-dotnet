@@ -88,7 +88,7 @@ public class RunWebApp
             });
 
             //Configure opentelemetry
-            builder.Services.AddOpenTelemetryTracing(builder => builder
+            builder.Services.AddOpenTelemetry().WithTracing(builder => builder
                 .AddAspNetCoreInstrumentation(options =>{options.RecordException = true;})
                 .AddHttpClientInstrumentation()
                 .SetResourceBuilder(
