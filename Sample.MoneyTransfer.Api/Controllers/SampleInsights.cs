@@ -407,10 +407,10 @@ public class SampleInsightsController : ControllerBase
     {
         using var activity = Activity.StartActivity("NewInternalSpan");
 
-        Enumerable.Range(0, 10).Foreach(_ => DbQueryUsers());
+        /*Enumerable.Range(0, 10).Foreach(_ => DbQueryUsers());
         Enumerable.Range(0, 10).Foreach(_ => DbQueryAccounts());
         Enumerable.Range(0, 80).Foreach(_ => DbQueryRoles());
-        Enumerable.Range(0, 70).Foreach(_ => DbQueryGroups());
+        Enumerable.Range(0, 70).Foreach(_ => DbQueryGroups());*/
     }
     
     private static void DbQueryUsers()
