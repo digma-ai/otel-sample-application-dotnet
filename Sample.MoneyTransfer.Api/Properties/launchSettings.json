@@ -13,7 +13,8 @@
       "launchBrowser": true,
       "applicationUrl": "http://localhost:7151/swagger/index.html",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DIGMA_ENV": "CI"
       }
     },
     "IIS Express": {
