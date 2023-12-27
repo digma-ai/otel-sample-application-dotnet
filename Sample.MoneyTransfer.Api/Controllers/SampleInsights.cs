@@ -14,9 +14,8 @@ class SampleInsightsService
 
     public SampleInsightsService()
     {
-        
     }
-    
+
     private void Connect(string connectionName)
     {
         throw new ConnectionAbortedException($"aborting connection named {connectionName}");
@@ -208,22 +207,22 @@ public class SampleInsightsController : ControllerBase
                 break;
         }
     }
-    
+
     [HttpGet]
     [Route("UnverifiedChange/{milisec}")]
     public async Task UnverifiedChange(int milisec)
     {
         await DelayAsync(TimeSpan.FromMilliseconds(milisec));
     }
- 
+
     [HttpGet]
     [Route("PureDelay/{milisec}")]
     public async Task PureDelay(int milisec)
     {
         await Task.Delay(milisec);
     }
-    
-     
+
+
     [HttpGet]
     [Route("Nesting/{milisec}")]
     public async Task Nesting(int milisec)
@@ -242,7 +241,7 @@ public class SampleInsightsController : ControllerBase
         using var activity = Activity.StartActivity();
         await Task.Delay(milisec * 2);
     }
-    
+
     [HttpGet]
     [Route("Delay/{milisec}")]
     public async Task Delay(int milisec)
@@ -260,10 +259,11 @@ public class SampleInsightsController : ControllerBase
         {
             await DelayAsync(TimeSpan.FromSeconds(2));
         }
+
         var dist = new MathNet.Numerics.Distributions.Normal(milisec, milisec / 10);
         await WaitForLock(dist);
     }
-    
+
     [HttpGet]
     [Route("lock1/{milisec}")]
     public async Task Lock1(double milisec = 10)
@@ -272,6 +272,7 @@ public class SampleInsightsController : ControllerBase
         {
             await DelayAsync(TimeSpan.FromSeconds(2));
         }
+
         var dist = new MathNet.Numerics.Distributions.Normal(milisec, milisec / 10);
         await WaitForLock(dist);
     }
@@ -281,28 +282,28 @@ public class SampleInsightsController : ControllerBase
         using var activity1 = Activity.StartActivity("Internal", ActivityKind.Internal);
         await Task.Delay(TimeSpan.FromMilliseconds(500));
     }
-    
+
     private async Task Service1()
     {
         using var activity1 = Activity.StartActivity("Service1", ActivityKind.Server);
         await Task.Delay(TimeSpan.FromMilliseconds(100));
         await Internal();
     }
-    
-    
+
+
     private async Task Service2()
     {
         using var activity2 = Activity.StartActivity("Service2", ActivityKind.Client);
         await Service1();
     }
-    
+
     private async Task Service3()
     {
         using var activity2 = Activity.StartActivity("Service3", ActivityKind.Client);
         await Service1();
     }
 
-    
+
     [HttpGet]
     [Route("ServiceEndpoint")]
     public async Task ServiceEndpoint()
@@ -310,7 +311,7 @@ public class SampleInsightsController : ControllerBase
         await Service2();
         await Service3();
     }
-    
+
 
     [HttpGet]
     [Route("lock2/{milisec}")]
@@ -320,10 +321,11 @@ public class SampleInsightsController : ControllerBase
         {
             await DelayAsync(TimeSpan.FromSeconds(2));
         }
+
         var dist = new MathNet.Numerics.Distributions.Normal(milisec, milisec / 10);
         await WaitForLock(dist);
     }
-    
+
     [HttpGet]
     [Route("lock3/{milisec}")]
     public async Task Lock3(double milisec = 10)
@@ -332,10 +334,11 @@ public class SampleInsightsController : ControllerBase
         {
             await DelayAsync(TimeSpan.FromSeconds(2));
         }
+
         var dist = new MathNet.Numerics.Distributions.Normal(milisec, milisec / 10);
         await WaitForLock(dist);
     }
-    
+
     [HttpGet]
     [Route("lock4/{milisec}")]
     public async Task Lock4(double milisec = 10)
@@ -344,10 +347,11 @@ public class SampleInsightsController : ControllerBase
         {
             await DelayAsync(TimeSpan.FromSeconds(1));
         }
+
         var dist = new MathNet.Numerics.Distributions.Normal(milisec, milisec / 10);
         await WaitForLock(dist);
     }
-    
+
     [HttpGet]
     [Route("lock5/{milisec}")]
     public async Task Lock5(double milisec = 10)
@@ -356,10 +360,11 @@ public class SampleInsightsController : ControllerBase
         {
             await DelayAsync(TimeSpan.FromSeconds(1));
         }
+
         var dist = new MathNet.Numerics.Distributions.Normal(milisec, milisec / 10);
         await WaitForLock(dist);
     }
-    
+
     [HttpGet]
     [Route("lock6/{milisec}")]
     public async Task Lock6(double milisec = 10)
@@ -368,6 +373,7 @@ public class SampleInsightsController : ControllerBase
         {
             await DelayAsync(TimeSpan.FromSeconds(1));
         }
+
         var dist = new MathNet.Numerics.Distributions.Normal(milisec, milisec / 10);
         await WaitForLock(dist);
     }
@@ -385,59 +391,59 @@ public class SampleInsightsController : ControllerBase
             _semaphoreSlim.Release();
         }
     }
-    
+
     private static async Task DelayAsync(TimeSpan timeSpan)
     {
         using var activity = Activity.StartActivity();
         await Task.Delay(timeSpan);
     }
-    
-     
+
+
     [HttpGet]
     [Route(nameof(BottleNeckTest))]
-    public void BottleNeckTest()
+    public async Task BottleNeckTest()
     {
-        DbQueryUsersBottleNeck();
-        DbQueryAccountsBottleNeck();
+        await DbQueryUsersBottleNeck();
+        await DbQueryAccountsBottleNeck();
     }
-    
+
     [HttpGet]
     [Route(nameof(NPlusOne))]
     public void NPlusOne()
     {
         using var activity = Activity.StartActivity("NewInternalSpan");
 
-        Enumerable.Range(0, 10).Foreach(_ => DbQueryUsers());
-        
-        Enumerable.Range(0, 10).Foreach(_ => DbQueryAccounts());
-        Enumerable.Range(0, 80).Foreach(_ => DbQueryRoles());
-        Enumerable.Range(0, 70).Foreach(_ => DbQueryGroups());
+        Enumerable.Range(0, 4).Foreach(_ => DbQueryUsers());
+
+        Enumerable.Range(0, 4).Foreach(_ => DbQueryAccounts());
+        Enumerable.Range(0, 4).Foreach(_ => DbQueryRoles());
+        Enumerable.Range(0, 4).Foreach(_ => DbQueryGroups());
     }
-    
+
     private static void DbQueryUsers()
     {
         using var activity = Activity.StartActivity(ActivityKind.Client);
         activity?.SetTag("db.statement", "select * from users");
-    } 
-    
+    }
+
     private static void DbQueryAccounts()
     {
         using var activity = Activity.StartActivity(ActivityKind.Client);
         activity?.SetTag("db.statement", "select * from accounts where a = 1 b =2 c = 3");
     }
-    
-    private static void DbQueryUsersBottleNeck()
+
+    private static async Task DbQueryUsersBottleNeck()
     {
         using var activity = Activity.StartActivity();
         activity?.SetTag("db.statement", "select * from users");
-        Task.Delay(100);
-    } 
-    
-    private static void DbQueryAccountsBottleNeck()
+        await Task.Delay(100);
+    }
+
+    private static async Task DbQueryAccountsBottleNeck()
     {
         using var activity = Activity.StartActivity();
         activity?.SetTag("db.statement", "select * from accounts where a = 1 b =2 c = 3");
-        Task.Delay(100);
+        await Task.Delay(200 );
     }
 
     private static void DbQueryRoles()
@@ -445,7 +451,7 @@ public class SampleInsightsController : ControllerBase
         using var activity = Activity.StartActivity(ActivityKind.Client);
         activity?.SetTag("db.statement", "select * from roles");
     }
-    
+
     private static void DbQueryGroups()
     {
         using var activity = Activity.StartActivity(ActivityKind.Client);
@@ -465,7 +471,7 @@ public class SampleInsightsController : ControllerBase
 
         throw new ValidationException("random validation error");
     }
-    
+
     [HttpGet]
     [Route("Error2")]
     public async Task Error2()
@@ -489,7 +495,7 @@ public class SampleInsightsController : ControllerBase
         await (new DummyFile()).SpanBottleNeck1();
         await (new DummyFile()).SpanBottleNeck2();
     }
-    
+
     [HttpGet]
     [Route("SpanBottleneck1")]
     public async Task SpanBottleneck1()
@@ -527,7 +533,7 @@ public class SampleInsightsController : ControllerBase
     }
 
     /*
-     *1       1  
+     *1       1
      * *3     10 mid
      * *1     20 calls
      */
@@ -560,6 +566,7 @@ public class SampleInsightsController : ControllerBase
         {
             Thread.Sleep(5);
         }
+
         void Action()
         {
             using var b = Activity.StartActivity("Local func activity");
@@ -567,9 +574,10 @@ public class SampleInsightsController : ControllerBase
                 Thread.Sleep(5);
             }
         }
- 
+
         Action();
-        var action = ()=>{
+        var action = () =>
+        {
             using var c = Activity.StartActivity("Anonymous activity");
             {
                 Thread.Sleep(5);
@@ -590,13 +598,14 @@ public class SampleInsightsController : ControllerBase
             Thread.Sleep(extraLatency);
         }
     }
+
     [HttpGet]
     [Route("SpanGenerator")]
     public async Task SpanGenerator([FromQuery] int count)
     {
         var maxConcurrency = 10;
         int i = 3000;
-        System.Diagnostics.Activity.Current = null; 
+        System.Diagnostics.Activity.Current = null;
         while (count > 0)
         {
             using var ac = Activity.StartActivity($"dynamic_span_{++i}");

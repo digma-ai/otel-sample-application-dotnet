@@ -14,7 +14,7 @@
       "applicationUrl": "http://localhost:7151/swagger/index.html",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "DIGMA_ENV": "CI"
+        "DIGMA_ENV": "BOTTLENECK"
       }
     },
     "IIS Express": {
