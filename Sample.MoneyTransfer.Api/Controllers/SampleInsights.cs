@@ -413,11 +413,11 @@ public class SampleInsightsController : ControllerBase
     {
         using var activity = Activity.StartActivity("NewInternalSpan");
 
-        Enumerable.Range(0, 4).Foreach(_ => DbQueryUsers());
+        Enumerable.Range(0, 1).Foreach(_ => DbQueryUsers());
 
-        Enumerable.Range(0, 4).Foreach(_ => DbQueryAccounts());
-        Enumerable.Range(0, 4).Foreach(_ => DbQueryRoles());
-        Enumerable.Range(0, 4).Foreach(_ => DbQueryGroups());
+        Enumerable.Range(0, 1).Foreach(_ => DbQueryAccounts());
+        Enumerable.Range(0, 1).Foreach(_ => DbQueryRoles());
+        Enumerable.Range(0, 1).Foreach(_ => DbQueryGroups());
     }
 
     private static void DbQueryUsers()
@@ -443,7 +443,7 @@ public class SampleInsightsController : ControllerBase
     {
         using var activity = Activity.StartActivity();
         activity?.SetTag("db.statement", "select * from accounts where a = 1 b =2 c = 3");
-        await Task.Delay(200 );
+        await Task.Delay(200);
     }
 
     private static void DbQueryRoles()
