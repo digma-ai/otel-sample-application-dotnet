@@ -629,4 +629,16 @@ public class SampleInsightsController : ControllerBase
         //     await Task.Delay(50);
         // }
     }
+    
+    
+    [HttpGet]
+    [Route("SpanBottleneckAsync")]
+    public async Task SpanBottleneckAsync()
+    {
+        Task.Run(async () =>
+        {
+            using var activity = Activity.StartActivity("SpanBottleneckAsync");
+            await Task.Delay(200);
+        });
+    }
 }
