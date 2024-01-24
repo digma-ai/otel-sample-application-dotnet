@@ -27,6 +27,22 @@ public class InsightDataGenerator
         await Task.WhenAll(tasks);
     }
 
+    public async Task GenerateSlowdownSourceData()
+    {
+        Console.WriteLine("***** generate slowdown source data *****");
+
+        var tasks = new ConcurrentBag<Task>();
+
+        await Execute(() => tasks.Add(_client.GetAsync($"{_url}/SampleInsights/EndpointSlowDownSource/1")), 30, 15.Seconds());
+        await Task.WhenAll(tasks);
+
+        // 30 secs
+        await Task.Delay(30000);
+        
+        await Execute(() => tasks.Add(_client.GetAsync($"{_url}/SampleInsights/EndpointSlowDownSource/200")), 30, 15.Seconds());
+        await Task.WhenAll(tasks);
+    }
+    
     public async Task GenerateNoScalingData()
     {
         Console.WriteLine("***** generate no scaling *****");
@@ -137,7 +153,11 @@ public class InsightDataGenerator
 
         Console.WriteLine("***** generate N-Plus-One insight *****");
         await _client.GetAsync($"{_url}/SampleInsights/NPlusOne");
+        await _client.GetAsync($"{_url}/SampleInsights/NPlusOneSingleSpan");
 
+        Console.WriteLine("***** generate high number of queries insights *****");
+        await _client.GetAsync($"{_url}/SampleInsights/HighNumberOfQueries");
+        
         Console.WriteLine("***** generate errors insights *****");
         for (int i = 0; i < 20; i++)
         {
@@ -219,6 +239,8 @@ public class InsightDataGenerator
         }
 
         await _client.GetAsync($"{_url}/SampleInsights/Spans");
+
+        await _client.GetAsync($"{_url}/SampleInsights/ChattyApiInsight");
 
         Console.WriteLine("***** END GenerateInsightData *****");
     }

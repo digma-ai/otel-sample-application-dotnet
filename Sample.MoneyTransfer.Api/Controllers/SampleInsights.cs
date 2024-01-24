@@ -113,11 +113,6 @@ public class SampleInsightsController : ControllerBase
     private static readonly Random Random = new(Math.Abs((int)DateTime.Now.Ticks));
     private readonly SampleInsightsService _service;
 
-    public SampleInsightsController()
-    {
-        _service = new SampleInsightsService();
-    }
-
     [HttpGet]
     [Route("Rethrow2")]
     public async Task Rethrow2()
@@ -159,6 +154,15 @@ public class SampleInsightsController : ControllerBase
         await Task.Delay(TimeSpan.FromMilliseconds(1));
         _service.HandledException();
         throw new ArgumentException("empty argument");
+    }
+    
+    [HttpGet]
+    [Route("ErrorOnRequest")]
+    public async Task ErrorOnRequest(bool throwError = false)
+    {
+        await Task.Delay(TimeSpan.FromMilliseconds(1));
+        if (throwError)
+            throw new ArgumentException("empty argument");
     }
 
     [HttpGet]
@@ -219,6 +223,48 @@ public class SampleInsightsController : ControllerBase
     [HttpGet]
     [Route("PureDelay/{milisec}")]
     public async Task PureDelay(int milisec)
+    {
+        await Task.Delay(milisec);
+    }
+    
+    [HttpGet]
+    [Route("PureDelay2/{milisec}")]
+    public async Task PureDelay2(int milisec)
+    {
+        await Task.Delay(milisec);
+    }
+    
+    [HttpGet]
+    [Route("PureDelay4/{milisec}")]
+    public async Task PureDelay4(int milisec)
+    {
+        await Task.Delay(milisec);
+    }
+    
+    [HttpGet]
+    [Route("PureDelay5/{milisec}")]
+    public async Task PureDelay5(int milisec)
+    {
+        await Task.Delay(milisec);
+    }
+    
+    [HttpGet]
+    [Route("PureDelay6/{milisec}")]
+    public async Task PureDelay6(int milisec)
+    {
+        await Task.Delay(milisec);
+    }
+    
+    [HttpGet]
+    [Route("PureDelay7/{milisec}")]
+    public async Task PureDelay7(int milisec)
+    {
+        await Task.Delay(milisec);
+    }
+    
+    [HttpGet]
+    [Route("PureDelay8/{milisec}")]
+    public async Task PureDelay8(int milisec)
     {
         await Task.Delay(milisec);
     }
@@ -400,18 +446,89 @@ public class SampleInsightsController : ControllerBase
         DbQueryUsersBottleNeck();
         DbQueryAccountsBottleNeck();
     }
+    [HttpGet]
+    [Route(nameof(NPlusOneOnlyEndpoint))]
+    public void NPlusOneOnlyEndpoint()
+    {
+        Enumerable.Range(0, 10).Foreach(_ => DbQueryAccounts());
+        Enumerable.Range(0, 10).Foreach(_ => DbQueryAccounts2());
+    }
     
     [HttpGet]
-    [Route(nameof(NPlusOne))]
-    public void NPlusOne()
+    [Route(nameof(DbQuery10ms1))]
+    public void DbQuery10ms1()
     {
-        using var activity = Activity.StartActivity("NewInternalSpan");
+        DbQueryAccounts10ms1();
+    }
+    
+    [HttpGet]
+    [Route(nameof(DbQuery10ms2))]
+    public void DbQuery10ms2()
+    {
+        DbQueryAccounts10ms2();
+    }
+    
+    [HttpGet]
+    [Route(nameof(DbQuery10ms3))]
+    public void DbQuery10ms3()
+    {
+        DbQueryAccounts10ms3();
+    }
+    
+    /*
+     * 
+     */
+    
+    [HttpGet]
+    [Route(nameof(NPlusOneSingleSpan))]
+    public void NPlusOneSingleSpan() // check if this entrypoint has span with RootEndpointName == NPlusOneSingleSpan
+    {
+        using var activity1 = Activity.StartActivity("NewInternalSpan1"); // check if this span has any db...
+        
+        Enumerable.Range(0, 10).Foreach(_ => DbQueryAccounts()); // RootEndpointName == NPlusOneSingleSpan
+                                                                 // ParentSpanObjectId == NewInternalSpan1
+        Enumerable.Range(0, 10).Foreach(_ => DbQueryAccounts2()); //RootEndpointName == NPlusOneSingleSpan
+    }
+    
+    [HttpGet]
+    [Route(nameof(NPlusOneMultipleSpan))]
+    public void NPlusOneMultipleSpan()
+    {
+        using var activity1 = Activity.StartActivity("NewInternalSpan1");
 
         Enumerable.Range(0, 10).Foreach(_ => DbQueryUsers());
         Enumerable.Range(0, 10).Foreach(_ => DbQueryAccounts());
         Enumerable.Range(0, 80).Foreach(_ => DbQueryRoles());
         Enumerable.Range(0, 70).Foreach(_ => DbQueryGroups());
+        
+        using var activity2 = Activity.StartActivity("NewInternalSpan2");
+
+        Enumerable.Range(0, 30).Foreach(_ => DbQueryUsers());
+        Enumerable.Range(0, 30).Foreach(_ => DbQueryAccounts());
+        Enumerable.Range(0, 80).Foreach(_ => DbQueryRoles());
+        Enumerable.Range(0, 70).Foreach(_ => DbQueryGroups());
     }
+
+    [HttpGet]
+    [Route(nameof(NPlusOne))]
+    public void NPlusOne()
+    {
+        Enumerable.Range(0, 10).Foreach(_ => DbQueryUsers());
+        Enumerable.Range(0, 10).Foreach(_ => DbQueryAccounts());
+        Enumerable.Range(0, 80).Foreach(_ => DbQueryRoles());
+        Enumerable.Range(0, 70).Foreach(_ => DbQueryGroups());
+    }
+    
+    [HttpGet]
+    [Route(nameof(HighNumberOfQueries))]
+    public void HighNumberOfQueries()
+    {
+        Enumerable.Range(0, 1000).Foreach(_ => DbQueryUsers());
+        Enumerable.Range(0, 1000).Foreach(_ => DbQueryAccounts());
+        Enumerable.Range(0, 8000).Foreach(_ => DbQueryRoles());
+        Enumerable.Range(0, 7000).Foreach(_ => DbQueryGroups());
+    }
+
     
     private static void DbQueryUsers()
     {
@@ -422,7 +539,36 @@ public class SampleInsightsController : ControllerBase
     private static void DbQueryAccounts()
     {
         using var activity = Activity.StartActivity(ActivityKind.Client);
-        activity?.SetTag("db.statement", "select * from accounts where a = 1 b =2 c = 3");
+        activity?.SetTag("db.statement", "select * from accounts where a = 1");
+    }
+    
+    private static void DbQueryAccounts10ms1()
+    {
+        using var activity = Activity.StartActivity("DbQueryAccounts10ms1", ActivityKind.Client);
+        Thread.Sleep(10);
+        activity?.SetTag("db.statement", "select * from accounts where a = 1");
+    }
+    
+    private static void DbQueryAccounts10ms2()
+    {
+        using var activity = Activity.StartActivity("DbQueryAccounts10ms2", ActivityKind.Client);
+        Thread.Sleep(10);
+        activity?.SetTag("db.statement", "select * from accounts where a = 4 b =5");
+    }
+
+    
+    private static void DbQueryAccounts10ms3()
+    {
+        using var activity = Activity.StartActivity("DbQueryAccounts10ms3", ActivityKind.Client);
+        Thread.Sleep(10);
+        activity?.SetTag("db.statement", "select * from accounts where a = 7 b =8 c = 9");
+    }
+
+    
+    private static void DbQueryAccounts2()
+    {
+        using var activity = Activity.StartActivity(ActivityKind.Client);
+        activity?.SetTag("db.statement", "select * from someother where a = 4 b =5 c = 6");
     }
     
     private static void DbQueryUsersBottleNeck()
@@ -456,12 +602,19 @@ public class SampleInsightsController : ControllerBase
     public async Task Error()
     {
         using var activity = Activity.StartActivity("Error");
+        
         await Task.Delay(TimeSpan.FromMilliseconds(1));
+        
         if (Random.Next(1, 10) % 2 == 0)
+            throw new ValidationException("random validation error");
+        else
         {
             throw new InvalidOperationException("operation is not valid");
         }
+    }
 
+    private async Task ErrorA()
+    {
         throw new ValidationException("random validation error");
     }
     
@@ -589,6 +742,42 @@ public class SampleInsightsController : ControllerBase
             Thread.Sleep(extraLatency);
         }
     }
+    
+    
+    [HttpGet]
+    [Route("ChattyApiInsight")]
+    public async Task ChattyApiInsight()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            await HttpClientCall();
+        }
+    }
+
+    private async Task HttpClientCall()
+    {
+        using var activity = Activity.StartActivity("HttpClientCall", ActivityKind.Client);
+
+        activity.AddTag("http.url", "http://url.com");
+        activity.AddTag("http.method", "HTTP.GET");
+        activity.AddTag("http.target", "http://url.com");
+        activity.AddTag("http.route", "url.com");
+        
+        await Task.Delay(10);
+    }
+
+    [HttpGet]
+    [Route("AddTag")]
+    public async Task AddTag()
+    {
+        using var activity = Activity.StartActivity("AddTag");
+        activity?.AddTag("sample.num", 1);
+        activity?.AddTag("sample.bool", true);
+        activity?.AddBaggage("sss", "dddd");
+        activity?.AddEvent(new ActivityEvent("something"));
+        await Task.Delay(1);
+    }
+    
     [HttpGet]
     [Route("SpanGenerator")]
     public async Task SpanGenerator([FromQuery] int count)
@@ -628,5 +817,25 @@ public class SampleInsightsController : ControllerBase
         //     using var activity = Activity.StartActivity($"dynamic_span_{i+1}");
         //     await Task.Delay(50);
         // }
+    }
+    
+    /// <summary>
+    /// Should be called with 1 ms delay, after endpoint is processes increase to 100.
+    /// This increase will be detected, and SlowDownSourceSpan span will be marked as a slowdown source
+    /// </summary>
+    /// <param name="delay"></param>
+    [HttpGet]
+    [Route("EndpointSlowDownSource")]
+    public async Task EndpointSlowdownSourceEndpoint([FromQuery] int delay)
+    {
+        await Task.Delay(50);
+        await SlowDownSourceSpan(delay);
+    }
+
+    private async Task SlowDownSourceSpan(int delay)
+    {
+        using var ac = Activity.StartActivity($"SlowDownSourceSpan");
+
+        await Task.Delay(delay);
     }
 }
