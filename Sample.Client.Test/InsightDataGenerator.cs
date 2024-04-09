@@ -239,6 +239,8 @@ public class InsightDataGenerator
         }
 
         await _client.GetAsync($"{_url}/SampleInsights/Spans");
+        
+        await _client.GetAsync($"{_url}/SampleInsights/QueryOptimization?produceFastQueries=true");
 
         await _client.GetAsync($"{_url}/SampleInsights/ChattyApiInsight");
 

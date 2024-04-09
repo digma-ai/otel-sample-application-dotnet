@@ -28,6 +28,7 @@ public class RunWebApp
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddTransient<TransferFundsEventConsumer>();
+            builder.Services.AddTransient<QueryOptimizationEventConsumer>();
             
             var digmaUrl = builder.Configuration.GetSection("Digma").GetValue<string>("URL");
             Console.WriteLine($"Digma Url: {digmaUrl}");
@@ -45,6 +46,7 @@ public class RunWebApp
                 {
                     o.SetKebabCaseEndpointNameFormatter();
                     o.AddConsumer<TransferFundsEventConsumer>();
+                    o.AddConsumer<QueryOptimizationEventConsumer>();
                     o.UsingRabbitMq((context, configurator) =>
                     {  
                         var configuration = context.GetService<IConfiguration>();
@@ -60,6 +62,11 @@ public class RunWebApp
                         configurator.ReceiveEndpoint(KebabCaseEndpointNameFormatter.Instance.Consumer<TransferFundsEventConsumer>(), c => {
                              c.ConfigureConsumer<TransferFundsEventConsumer>(context);
                         });
+                        
+                        configurator.ReceiveEndpoint(KebabCaseEndpointNameFormatter.Instance.Consumer<QueryOptimizationEventConsumer>(), c => {
+                            c.ConfigureConsumer<QueryOptimizationEventConsumer>(context);
+                        });
+                        
                         configurator.ConfigureEndpoints(context);
                     });
                 });
@@ -85,6 +92,7 @@ public class RunWebApp
             builder.Services.UseDigmaMassTransitConsumeObserver(o =>
             {
                 o.Observe<TransferFundsEventConsumer>();
+                o.Observe<QueryOptimizationEventConsumer>();
             });
 
             //Configure opentelemetry
@@ -117,6 +125,7 @@ public class RunWebApp
             
             builder.Services.AddTransient<CreditProviderService>();
             builder.Services.AddTransient<MoneyTransferDomainService>();
+            builder.Services.AddTransient<IQueryOptimizationService, QueryOptimizationService>();
             
             builder.Services.AddScoped(x => TraceDecorator<ICreditProviderService>.Create(x.GetRequiredService<CreditProviderService>()));
             builder.Services.AddScoped(x => TraceDecorator<IMoneyTransferDomainService>.Create(x.GetRequiredService<MoneyTransferDomainService>()));
