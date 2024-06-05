@@ -12,6 +12,28 @@ class SampleInsightsService
 {
     private static readonly ActivitySource Activity = new(nameof(SampleInsightsService));
 
+    private static readonly Random _random = new Random();
+    public void ThrowMultipleSourceArgumentException()
+    {
+        bool randomBool = _random.Next(2) == 0;
+        if(randomBool) ThrowArgumentExceptionSource1();
+        else ThrowArgumentExceptionSource2();
+    }
+    private void ThrowArgumentExceptionSource1()
+    {
+        Raise("err1");
+        
+    }
+
+    private void ThrowArgumentExceptionSource2()
+    {
+        Raise("err2");
+    }
+    private void Raise(string msg)
+    {
+        throw new ArgumentException(msg);
+    }
+    
     private void Connect(string connectionName)
     {
         throw new ConnectionAbortedException($"aborting connection named {connectionName}");
@@ -444,5 +466,59 @@ public class SampleInsightsController : ControllerBase
         //     using var activity = Activity.StartActivity($"dynamic_span_{i+1}");
         //     await Task.Delay(50);
         // }
+    }
+    [HttpGet]
+    [Route("DemoMultiSpansError")]
+    public void DemoMultiSpansError()
+    {
+        using var activity = Activity.StartActivity("TestError");
+        try
+        {
+            M1();
+        }
+        catch (Exception ex)
+        {
+            activity.RecordException(ex);
+            throw;
+        }
+    }
+
+    [HttpGet]
+    [Route("DemoRethrow")]
+    public async Task DemoRethrow()
+    {
+        using var activity = Activity.StartActivity("DemoRethrow1");
+        await Task.Delay(TimeSpan.FromMilliseconds(1));
+        try
+        {
+            _service.ThrowArgumentException();
+        }
+        catch (Exception ex)
+        {
+            activity.RecordException(ex);
+            throw new ArgumentException("empty argument", ex);
+        }
+    }
+
+    private static Random _random = new Random();
+    [HttpGet]
+    [Route("DemoMultipleSource")]
+    public void DemoMultipleSource()
+    {
+        _service.ThrowMultipleSourceArgumentException();
+    }
+    
+    private void M1()
+    {
+        using var activity = Activity.StartActivity();
+        try
+        {
+            throw new InvalidOperationException("1");
+        }
+        catch (Exception ex)
+        {
+            activity?.RecordException(ex);
+            throw;
+        }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Digma.MassTransit.Integration;
-using MassTransit;
+﻿using MassTransit;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Instrumentation.Digma;
@@ -28,7 +27,7 @@ public class RunWebApp
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddTransient<TransferFundsEventConsumer>();
-            
+            builder.Services.AddHttpClient();
             var digmaUrl = builder.Configuration.GetSection("Digma").GetValue<string>("URL");
             Console.WriteLine($"Digma Url: {digmaUrl}");
             var serviceName = typeof(RunWebApp).Assembly.GetName().Name;
@@ -82,10 +81,7 @@ public class RunWebApp
 
             Console.WriteLine($"GetLocalCommitHash: {commitHash}");
             builder.Services.UseDigmaHttpDiagnosticObserver();
-            builder.Services.UseDigmaMassTransitConsumeObserver(o =>
-            {
-                o.Observe<TransferFundsEventConsumer>();
-            });
+          
 
             //Configure opentelemetry
             builder.Services.AddOpenTelemetryTracing(builder => builder
@@ -100,6 +96,7 @@ public class RunWebApp
                             if(commitHash is not null) configure.CommitId = commitHash;
                             configure.SpanMappingPattern = @"(?<ns>[\S\.]+)\/(?<class>\S+)\.(?<method>\S+)";
                             configure.SpanMappingReplacement = @"${ns}.Controllers.${class}.${method}";
+                            configure.Environment = "dotnet";
                         })
                 )
                 .AddOtlpExporter(c =>
