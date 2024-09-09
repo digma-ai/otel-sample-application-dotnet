@@ -9,6 +9,7 @@ services:
       - Digma__URL=http://digma-collector-api:5050
       - DEPLOYMENT_COMMIT_ID
       - DEPLOYMENT_ENV
+      - DIGMA_ENV_TYPE
     ports:
       - "7151:7151"
     networks:

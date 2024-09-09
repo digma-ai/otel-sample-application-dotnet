@@ -1,5 +1,4 @@
-﻿using Digma.MassTransit.Integration;
-using MassTransit;
+﻿using MassTransit;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Instrumentation.Digma;
@@ -17,6 +16,38 @@ namespace Sample.MoneyTransfer.API;
 public class RunWebApp
 {
 
+    static void AddOpenTelemetry(IServiceCollection services, IConfiguration configuration, string otlpExporterUrl, string ? commitHash)
+    {
+        var otelBuilder = services.AddOpenTelemetry();
+        var serviceName = typeof(RunWebApp).Assembly.GetName().Name!;
+        services.UseDigmaHttpDiagnosticObserver();
+        var resourceBuilder = ResourceBuilder.CreateDefault()
+            .AddTelemetrySdk()
+            .AddService(serviceName)
+            .AddDigmaAttributes(configure =>
+            {
+                if(commitHash is not null) configure.CommitId = commitHash;
+                configure.NamespaceRoot = "Sample";
+            })
+            .AddEnvironmentVariableDetector();
+
+
+        otelBuilder
+            .WithTracing(builder => builder
+                .AddHttpClientInstrumentation()
+                .AddAspNetCoreInstrumentation(config => config.RecordException = true)
+                .SetResourceBuilder(resourceBuilder)
+                .AddOtlpExporter(c =>
+                {
+                    
+                    c.Endpoint = new Uri(otlpExporterUrl);
+                    c.Protocol = OtlpExportProtocol.Grpc;
+                })
+                .SetErrorStatusOnException()
+                .AddSource("*")
+            );
+    }
+    
 		public static void Run(string[] args)
         {
             //Standard MVC boilerplate
@@ -29,9 +60,10 @@ public class RunWebApp
             builder.Services.AddSwaggerGen();
             builder.Services.AddTransient<TransferFundsEventConsumer>();
             builder.Services.AddTransient<QueryOptimizationEventConsumer>();
+
             
-            var digmaUrl = builder.Configuration.GetSection("Digma").GetValue<string>("URL");
-            Console.WriteLine($"Digma Url: {digmaUrl}");
+            var otlpExporterUrl = builder.Configuration["OtlpExporterUrl"];
+            Console.WriteLine($"OtlpExporterUrl: {otlpExporterUrl}");
             var serviceName = typeof(RunWebApp).Assembly.GetName().Name;
             var serviceVersion = typeof(RunWebApp).Assembly.GetName().Version!.ToString();
 
@@ -89,36 +121,9 @@ public class RunWebApp
 
             Console.WriteLine($"GetLocalCommitHash: {commitHash}");
             builder.Services.UseDigmaHttpDiagnosticObserver();
-            builder.Services.UseDigmaMassTransitConsumeObserver(o =>
-            {
-                o.Observe<TransferFundsEventConsumer>();
-                o.Observe<QueryOptimizationEventConsumer>();
-            });
 
-            //Configure opentelemetry
-            builder.Services.AddOpenTelemetry().WithTracing(builder => builder
-                .AddAspNetCoreInstrumentation(options =>{options.RecordException = true;})
-                .AddHttpClientInstrumentation()
-                .SetResourceBuilder(
-                    ResourceBuilder.CreateDefault()
-                        .AddTelemetrySdk()
-                        .AddService(serviceName: serviceName, serviceVersion: serviceVersion ?? "0.0.0")
-                        .AddDigmaAttributes(configure =>
-                        {
-                            if(commitHash is not null) configure.CommitId = commitHash;
-                            configure.SpanMappingPattern = @"(?<ns>[\S\.]+)\/(?<class>\S+)\.(?<method>\S+)";
-                            configure.SpanMappingReplacement = @"${ns}.Controllers.${class}.${method}";
-                        })
-                )
-                .AddOtlpExporter(c =>
-                {
-                    
-                    c.Endpoint = new Uri(digmaUrl);
-                    c.Protocol = OtlpExportProtocol.Grpc;
-                })
-                .AddSource("*")
-            );  
-
+            AddOpenTelemetry(builder.Services, builder.Configuration, otlpExporterUrl, commitHash);
+          
             builder.Services
                 .AddDbContext<Gringotts >(options =>
                     options.UseInMemoryDatabase(databaseName: "Vault"));
