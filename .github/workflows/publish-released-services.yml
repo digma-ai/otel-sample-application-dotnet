@@ -44,6 +44,6 @@ jobs:
         type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
       dockerfile: ./Sample.Client.Test/Dockerfile
     secrets:
-      GH_PAT: ${{ secrets.TMP_GH_PAT }}
+      GH_PAT: ${{ secrets.GH_PAT }}
       REGISTRY_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       REGISTRY_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
