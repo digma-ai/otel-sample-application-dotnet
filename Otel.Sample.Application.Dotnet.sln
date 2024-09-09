@@ -7,6 +7,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.MoneyTransfer.API", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientTester", "Sample.Client.Test\ClientTester.csproj", "{79D6D767-EE98-47B0-B939-6DF0D4E61FA8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.NotificationService.API", "Sample.NotificationService.API\Sample.NotificationService.API.csproj", "{8A6EE307-582F-4013-A967-7AFE15106001}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0EA18F93-FA90-4B00-A1B9-19D8068F2F81}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.yml = docker-compose.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +28,10 @@ Global
 		{79D6D767-EE98-47B0-B939-6DF0D4E61FA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79D6D767-EE98-47B0-B939-6DF0D4E61FA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79D6D767-EE98-47B0-B939-6DF0D4E61FA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A6EE307-582F-4013-A967-7AFE15106001}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A6EE307-582F-4013-A967-7AFE15106001}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A6EE307-582F-4013-A967-7AFE15106001}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A6EE307-582F-4013-A967-7AFE15106001}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
