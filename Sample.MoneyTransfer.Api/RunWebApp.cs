@@ -16,7 +16,22 @@ namespace Sample.MoneyTransfer.API;
 public class RunWebApp
 {
 
-    static void AddOpenTelemetry(IServiceCollection services, IConfiguration configuration, string otlpExporterUrl, string ? commitHash)
+    static void SetSampler(IConfiguration configuration, TracerProviderBuilder builder)
+    {
+        var samplerProbability = configuration.GetValue<double?>("OtlpSamplerProbability");
+        if (samplerProbability is not null)
+        {
+            Console.WriteLine($"TracerProviderBuilder OtlpSamplerProbability was set to: {samplerProbability}");
+            builder.SetSampler(new ParentBasedSampler(new TraceIdRatioBasedSampler(samplerProbability.Value)));
+        }
+        else
+        {
+            builder.SetSampler(new ParentBasedSampler(new AlwaysOnSampler()));
+        }
+    }
+
+    static void AddOpenTelemetry(IServiceCollection services, IConfiguration configuration, string otlpExporterUrl,
+        string? commitHash)
     {
         var otelBuilder = services.AddOpenTelemetry();
         var serviceName = typeof(RunWebApp).Assembly.GetName().Name!;
@@ -26,27 +41,32 @@ public class RunWebApp
             .AddService(serviceName)
             .AddDigmaAttributes(configure =>
             {
-                if(commitHash is not null) configure.CommitId = commitHash;
+                if (commitHash is not null) configure.CommitId = commitHash;
                 configure.NamespaceRoot = "Sample";
             })
             .AddEnvironmentVariableDetector();
 
 
+
+
         otelBuilder
-            .WithTracing(builder => builder
-                .AddHttpClientInstrumentation()
-                .AddAspNetCoreInstrumentation(config => config.RecordException = true)
-                .SetResourceBuilder(resourceBuilder)
-                .AddOtlpExporter(c =>
+            .WithTracing(builder =>
                 {
-                    
-                    c.Endpoint = new Uri(otlpExporterUrl);
-                    c.Protocol = OtlpExportProtocol.Grpc;
-                })
-                .SetErrorStatusOnException()
-                .AddSource("*")
-            );
-    }
+                    SetSampler(configuration, builder);
+                    builder
+                        .AddHttpClientInstrumentation()
+                        .AddAspNetCoreInstrumentation(config => config.RecordException = true)
+                        .SetResourceBuilder(resourceBuilder)
+                        .AddOtlpExporter(c =>
+                        {
+                            c.Endpoint = new Uri(otlpExporterUrl);
+                            c.Protocol = OtlpExportProtocol.Grpc;
+                        })
+                        .SetErrorStatusOnException()
+                        .AddSource("*");
+            }
+    );
+}
     
 		public static void Run(string[] args)
         {
