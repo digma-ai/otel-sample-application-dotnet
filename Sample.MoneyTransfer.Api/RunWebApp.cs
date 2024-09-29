@@ -80,7 +80,20 @@ public class RunWebApp
             builder.Services.AddSwaggerGen();
             builder.Services.AddTransient<TransferFundsEventConsumer>();
             builder.Services.AddTransient<QueryOptimizationEventConsumer>();
+            builder.Services.AddHostedService<MonitorHostedService>();
 
+            builder.Services.AddHttpClient();
+            
+            builder.Services.AddHttpClient("NotificationClient", client =>
+                {
+                    client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("NotificationServiceUrl"));
+                })
+                .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+                {
+                    // Custom handler configuration (e.g., bypass SSL certificate validation)
+                    ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                });
+            
             
             var otlpExporterUrl = builder.Configuration["OtlpExporterUrl"];
             Console.WriteLine($"OtlpExporterUrl: {otlpExporterUrl}");
