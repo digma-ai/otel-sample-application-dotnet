@@ -1,10 +1,10 @@
 {
   "$schema": "https://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "Sample.MoneyTransfer.API": {
+    "Sample.NotificationService.API": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:7151/swagger/index.html",
+      "applicationUrl": "http://localhost:7153/swagger/index.html",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
