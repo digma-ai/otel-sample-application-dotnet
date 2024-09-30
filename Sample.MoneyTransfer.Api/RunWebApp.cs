@@ -81,6 +81,7 @@ public class RunWebApp
             builder.Services.AddTransient<TransferFundsEventConsumer>();
             builder.Services.AddTransient<QueryOptimizationEventConsumer>();
             builder.Services.AddHostedService<MonitorHostedService>();
+            builder.Services.AddTransient<IStatusService, StatusService>();
 
             builder.Services.AddHttpClient();
             
