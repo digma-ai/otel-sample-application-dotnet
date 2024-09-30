@@ -8,6 +8,7 @@ using Sample.NotificationService.API.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddTransient<INotificationService, NotificationService>();
+builder.Services.AddTransient<IStatusService, StatusService>();
 builder.Services.AddHostedService<MonitorHostedService>();
 builder.Services.AddOpenTelemetry()
     .ConfigureResource(r => r
